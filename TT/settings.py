@@ -14,7 +14,7 @@ with open(CONFIG_FILE) as f:
     SECRET_KEY = yaml.safe_load(f)['TT']['secret_key']
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
