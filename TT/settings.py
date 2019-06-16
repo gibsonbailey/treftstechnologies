@@ -7,9 +7,10 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PROJECT_ROOT = os.path.dirname(__file__)
 sys.path.insert(0, os.path.join(PROJECT_ROOT, 'apps'))
 
+CONFIG_FILE = os.path.join(PROJECT_ROOT, 'config')
 
 SECRET_KEY = None
-with open('config') as f:
+with open(CONFIG_FILE) as f:
     SECRET_KEY = yaml.safe_load(f)['TT']['secret_key']
 
 # SECURITY WARNING: don't run with debug turned on in production!
