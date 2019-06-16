@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+    <div id="header-block">
+        <div class="ui text container grid middle aligned">
+            <div class="middle aligned row">
+                <div class="column">
+                    <div class="ui centered header inverted">
+                        <h1 class="content" id="main-header">
+                            Trefts Technologies
+                        </h1>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="header-background">
+            <perlin></perlin>
+        </div>
+    </div>
+
+    <div class="ui container" id="swt">
+
+        <div class="ui centered container stackable four column grid" id="icon-container">
+            <div class="middle aligned row">
+                <div class="four wide column">
+                    <div class="ui small image">
+                        <img id="python-icon" src="{% static 'icons/python.png' %}">
+                    </div>
+                </div>
+                <div class="four wide column">
+                    <div class="ui small image">
+                        <img id='django-icon' src="{% static 'icons/django.png' %}">
+                    </div>
+                </div>
+                <div class="four wide column">
+                    <div class="ui small image">
+                        <img id='javascript-icon' src="{% static 'icons/javascript.png' %}">
+                    </div>
+                </div>
+                <div class="four wide column">
+                    <div class="ui small image">
+                        <img id='c++-icon' src="{% static 'icons/c++.png' %}">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        #header-block {
+            position: relative;
+            color: white;
+            height: 105vh;
+        }
+
+        #header-block .container {
+            height: 100%;
+        }
+
+        .header-background {
+            position: absolute;
+            top: 0;
+            z-index: -100;
+            width: 100%;
+        }
+
+        #main-header {
+            font-size: 75px;
+        }
+
+        #header-subtext {
+            font-size: 40px;
+            color: white;
+        }
+
+        #swt div {
+            font-size: 40px;
+            color: #919191;
+        }
+
+        #icon-container {
+            height: 60vh;
+        }
+
+    </style>
+{% endblock content %}
