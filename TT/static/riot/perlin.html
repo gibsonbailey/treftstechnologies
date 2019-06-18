@@ -44,8 +44,6 @@
             const plane_geo = new THREE.PlaneGeometry(w, h, w_res, h_res)
             const teal = new THREE.MeshStandardMaterial({
                 color: 0x063a44,
-                side: THREE.DoubleSide,
-//                flatShading: true,
                 wireframe: true,
             })
             const plane = new THREE.Mesh(plane_geo, teal)
