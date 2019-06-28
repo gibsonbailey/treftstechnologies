@@ -3,6 +3,9 @@ riot.tag2('perlin', '<canvas id="tutorial"></canvas>', 'perlin canvas,[data-is="
 
         this.on('mount', function(){
             const white = 0xFFFFFF;
+            const green_blue = 0x063a44;
+            const dark_gray = 0x222222;
+            const light_gray = 0x555555;
             const intensity = 1;
             const camera_width = 2
             const camera_height = 2
@@ -21,7 +24,7 @@ riot.tag2('perlin', '<canvas id="tutorial"></canvas>', 'perlin canvas,[data-is="
 			lights[ 1 ].position.set( 100, 200, 100 );
 			lights[ 2 ].position.set( - 100, - 200, - 100 );
 
-            scene.background = new THREE.Color(0x222222)
+            scene.background = new THREE.Color(white)
 
             if(window.devicePixelRatio <= 2) {
                 renderer.setPixelRatio(window.devicePixelRatio);
@@ -36,9 +39,7 @@ riot.tag2('perlin', '<canvas id="tutorial"></canvas>', 'perlin canvas,[data-is="
             const h_res = h * res
             const plane_geo = new THREE.PlaneGeometry(w, h, w_res, h_res)
             const teal = new THREE.MeshStandardMaterial({
-                color: 0x063a44,
-                side: THREE.DoubleSide,
-
+                color: light_gray,
                 wireframe: true,
             })
             const plane = new THREE.Mesh(plane_geo, teal)

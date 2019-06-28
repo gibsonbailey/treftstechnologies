@@ -15,8 +15,38 @@
             font-family: 'Roboto', sans-serif;
             font-weight: light;
         }
+
+        .navbar {
+            display: flex;
+            justify-content: flex-end;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: none;
+            z-index: 10;
+        }
+
+        .button-group {
+            display: flex;
+        }
+
+        .navbar > .button-group > .item {
+            padding: 25px;
+            color: white;
+            font-weight: light;
+            font-size: 20px;
+            margin-right: 40px;
+        }
+
     </style>
     <body>
+
+        <div class="navbar">
+            <div class="button-group">
+                <a class="item" href="{% url "articles:article_list" %}">Articles</a>
+            </div>
+        </div>
+
         {% block content %}
         {% endblock content %}
 

@@ -106,3 +106,7 @@ venv.bak/
 
 # Trefts Technologies
 /TT/config
+
+# Editor
+.idea/
+.idea

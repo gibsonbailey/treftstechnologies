@@ -14,7 +14,7 @@ with open(CONFIG_FILE) as f:
     SECRET_KEY = yaml.safe_load(f)['TT']['secret_key']
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -28,7 +28,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_extensions',
     'pages',
+    'articles',
 ]
 
 MIDDLEWARE = [
@@ -116,5 +118,8 @@ STATIC_ROOT = '/tmp/TT/static'
 STATICFILES_DIRS = [
     os.path.join(PROJECT_ROOT, "static"),
 ]
+
+MEDIA_ROOT = '/tmp/TT/media'
+MEDIA_URL = '/media/'
 
 SHELL_PLUS='bpython'

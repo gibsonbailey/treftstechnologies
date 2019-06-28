@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+    <div class="ui container articles">
+        <div class="ui grid">
+            {% for article in object_list %}
+                <div class="row">
+                    <div class="ui card"><img style="height: 100px; width: 100px;" src="{{ article.thumbnail.url }}"></div>
+                    <div class="ui large header">{{ article.title }}</div>
+                    <div class="ui sub header">{{ article.publish_date }}</div>
+                </div>
+                <div class="row">
+                    <div class="ui content">
+                        {{ article.abstract }}
+                    </div>
+                </div>
+                {% if not forloop.last %}
+                    <div class="ui horizontal divider"></div>
+                {% endif %}
+            {% empty %}
+                <h2 style="color: black;">No articles yet.</h2>
+            {% endfor %}
+
+        </div>
+    </div>
+
+    <style>
+        .articles {
+            margin-top: 20vh;
+        }
+    </style>
+{% endblock content %}

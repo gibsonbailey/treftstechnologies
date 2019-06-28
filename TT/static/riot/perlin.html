@@ -6,6 +6,9 @@
 
         this.on('mount', function(){
             const white = 0xFFFFFF;
+            const green_blue = 0x063a44;
+            const dark_gray = 0x222222;
+            const light_gray = 0x555555;
             const intensity = 1;
             const camera_width = 2
             const camera_height = 2
@@ -27,7 +30,8 @@
 
 
                // .position.set(2, -2, 4);
-            scene.background = new THREE.Color(0x222222)
+            //scene.background = new THREE.Color(0x222222)
+            scene.background = new THREE.Color(white)
 
             if(window.devicePixelRatio <= 2) {
                 renderer.setPixelRatio(window.devicePixelRatio);
@@ -43,7 +47,7 @@
             const h_res = h * res
             const plane_geo = new THREE.PlaneGeometry(w, h, w_res, h_res)
             const teal = new THREE.MeshStandardMaterial({
-                color: 0x063a44,
+                color: light_gray,
                 wireframe: true,
             })
             const plane = new THREE.Mesh(plane_geo, teal)
