@@ -5,23 +5,30 @@
 {% block content %}
     <div class="ui container articles">
         <div class="ui grid">
+            <div class="ui text container">
             {% for article in object_list %}
-                <div class="row">
-                    <div class="ui card"><img style="height: 100px; width: 100px;" src="{{ article.thumbnail.url }}"></div>
-                    <div class="ui large header">{{ article.title }}</div>
-                    <div class="ui sub header">{{ article.publish_date }}</div>
-                </div>
-                <div class="row">
-                    <div class="ui content">
-                        {{ article.abstract }}
+                    <div class="ui container article-container" style="position: relative;">
+                        <div class="img-container">
+                            <img class="float left" src="{{ article.thumbnail.url }}">
+                            <div class="dim"></div>
+                        </div>
+                        <div class="article-content">
+                            <div class="content float inverted right publish-date">{{ article.publish_date }}</div>
+                            <div class="ui large inverted header">{{ article.title }}</div>
+                            <p>
+                                {{ article.abstract }}
+                            </p>
+                        </div>
                     </div>
-                </div>
                 {% if not forloop.last %}
-                    <div class="ui horizontal divider"></div>
+                    <div class="ui horizontal header divider">
+                        <h4> - </h4>
+                    </div>
                 {% endif %}
             {% empty %}
                 <h2 style="color: black;">No articles yet.</h2>
             {% endfor %}
+            </div>
 
         </div>
     </div>
@@ -30,5 +37,62 @@
         .articles {
             margin-top: 20vh;
         }
+
+        .article-container {
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px;
+        }
+
+        .article-content {
+            position: relative;
+            padding: 40px;
+            transition: all 0.1s ease-in;
+        }
+
+        .publish-date {
+            color: #dddddd;
+        }
+
+        p {
+            color: white;
+        }
+
+        .img-container {
+            position: absolute;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            z-index: -10;
+        }
+
+        .dim {
+            position: absolute;
+            height: 100%;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.45);
+            z-index: -5;
+        }
+
+        img {
+            position: absolute;
+            object-fit: cover;
+            height: 100%;
+            width: 100%;
+            z-index: -6;
+        }
+
+        .divider {
+            margin: 10vh !important;
+        }
+
+        .article-content:hover {
+            transform: translateY(100);
+        }
+
+        .article-container:hover .article-content {
+            background: #3299ed;
+        }
+
     </style>
 {% endblock content %}

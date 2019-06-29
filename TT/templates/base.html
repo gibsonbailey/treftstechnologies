@@ -18,11 +18,15 @@
 
         .navbar {
             display: flex;
-            justify-content: flex-end;
+            justify-content: space-between;
             position: fixed;
             top: 0;
             width: 100%;
+        {% if home_nav %}
             background: none;
+        {% else %}
+            background: white;
+        {% endif %}
             z-index: 10;
         }
 
@@ -32,7 +36,7 @@
 
         .navbar > .button-group > .item {
             padding: 25px;
-            color: white;
+            color: #222222;
             font-weight: light;
             font-size: 20px;
             margin-right: 40px;
@@ -42,6 +46,11 @@
     <body>
 
         <div class="navbar">
+            <div class="button-group">
+                {% if not home_nav %}
+                    <a class="item" style="font-weight: bold;" href="{% url "pages:home" %}">Trefts Technologies.</a>
+                {% endif %}
+            </div>
             <div class="button-group">
                 <a class="item" href="{% url "articles:article_list" %}">Articles</a>
             </div>
