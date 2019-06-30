@@ -5,9 +5,10 @@
 {% block content %}
     <div class="ui container articles">
         <div class="ui grid">
+
             <div class="ui text container">
             {% for article in object_list %}
-                    <div class="ui container article-container" style="position: relative;">
+                    <a href="{% url "articles:detail" slug=article.slug %}" class="ui container article-container" style="position: relative;">
                         <div class="img-container">
                             <img class="float left" src="{{ article.thumbnail.url }}">
                             <div class="dim"></div>
@@ -19,7 +20,7 @@
                                 {{ article.abstract }}
                             </p>
                         </div>
-                    </div>
+                    </a>
                 {% if not forloop.last %}
                     <div class="ui horizontal header divider">
                         <h4> - </h4>

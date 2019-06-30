@@ -6,5 +6,6 @@ class HomePageView(TemplateView):
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
         data['home_nav'] = True
+        data['page_title'] = 'Home'
         return data
 

@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+    <div class="ui container">
+        <div class="ui centered container heading">
+            <div class="ui centered rounded image">
+                <img id="heading-image" src="{{ object.thumbnail.url }}">
+            </div>
+            <h1 class="ui header">
+                {{ object.title }}
+            </h1>
+            <div class="ui content">
+                <p class="description">
+                    {{ object.abstract }}
+                </p>
+                <div class="extra">
+                    {{ object.publish_date }}
+                </div>
+            </div>
+        </div>
+        <div class="ui horizontal divider"></div>
+        <div class="ui centered container">
+            <div class="ui content"></div>
+        </div>
+    </div>
+
+    <style>
+        .heading {
+            margin-top: 20vh;
+            width: 50vw !important;
+        }
+
+        #heading-image {
+            max-height: 45vh;
+            width: auto;
+        }
+    </style>
+{% endblock content %}
+
