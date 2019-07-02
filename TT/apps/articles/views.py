@@ -10,7 +10,10 @@ class ArticleListView(ListView):
     ordering = '-publish_date'
 
     def get_queryset(self):
-        return ArticleModel.objects.filter(published=True)
+        if self.request.user.is_superuser:
+            return ArticleModel.objects.all()
+        else:
+            return ArticleModel.objects.filter(published=True)
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
@@ -24,6 +27,7 @@ class ArticleDetailView(DetailView):
 
     def get_object(self):
         object = super().get_object()
-        if object.published == False:
+        if object.published == False and not self.request.user.is_superuser:
             raise Http404()
         return object
+
