@@ -42,27 +42,94 @@
 
         .button-group {
             display: flex;
+            margin-top: 30px;
         }
 
-        .navbar > .button-group > .item {
-            padding: 25px;
+        .nav_item {
             color: #222222;
-            font-weight: light;
-            font-size: 100%;
-            margin-right: 40px;
+            font-weight: bold;
+            font-size: 2em;
+            margin: 0 30px 0 30px;
+            height: 1.5em;
+        }
+
+        .ui.small.modal {
+            font-size: 1.5em;
+        }
+
+        .field > input {
+            font-size: 1.3em !important;
+        }
+
+        .ui.button.login {
+            font-size: 1.3em;
+        }
+
+        .user-dropdown-label {
+            color: #222222;
+        }
+
+        .ui.dropdown > .menu {
+            border: none;
+            background: none;
+        }
+
+        .ui.dropdown > .menu > .item {
+            color: #222222;
+            font-weight: bold;
+            font-size: 0.8em;
         }
 
     </style>
     <body>
 
+        <div class="ui small modal">
+            <div class="large header">
+                Log in to Trefts Technologies
+            </div>
+            <div class="content">
+                <form id="login_form" class="ui form" method="post" action="{% url 'accounts:login' %}">
+                    {% csrf_token %}
+                    <div class="field">
+                        <input type="text" name="username" placeholder="Username" maxlength="30" autofocus required>
+                    </div>
+                    <div class="field">
+                        <input type="password" placeholder="Password" name="password" required>
+                    </div>
+                    <button type="submit" class="ui blue login button">Login</button>
+                </form>
+            </div>
+            <div class="ui divider"></div>
+            <div class="content">
+                <p>New to Trefts Technologies?  <button type="submit" class="ui inline basic blue button">Sign Up</button></p>
+            </div>
+        </div>
+
         <div class="navbar">
             <div class="button-group">
                 {% if not home_nav %}
-                    <a class="item" style="font-weight: bold;" href="{% url "pages:home" %}">Trefts Technologies.</a>
+                    <a class="nav_item" href="{% url "pages:home" %}">Trefts Technologies.</a>
                 {% endif %}
             </div>
             <div class="button-group">
-                <a class="item" href="{% url "articles:list" %}">Articles</a>
+                <a class="nav_item" href="{% url "articles:list" %}">Articles</a>
+                {% if not user.is_authenticated %}
+                <a id="login_button" class="nav_item" href="#">Login</a>
+                {% else %}
+{#                    <a class="item" href="{% url "profiles:home" %}">{{ user.username }}</a>#}
+                    <div class="ui nav_item simple dropdown">
+                        <a class="text user-dropdown-label" href="#">
+                            {% if user.first_name %}
+                                {{ user.first_name}}
+                            {% else %}
+                                {{ user.username }}
+                            {% endif %}
+                        </a>
+                        <div class="menu">
+                            <a class="item" href="{% url "accounts:logout" %}">Logout</a>
+                        </div>
+                    </div>
+                {% endif %}
             </div>
         </div>
 
@@ -73,6 +140,7 @@
         <script src="{% static "riot/all.js" %}"></script>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/105/three.min.js"></script>
         <script src="{% static "js/utility/perlin.js" %}"></script>
@@ -80,6 +148,11 @@
         {% endblock extra_js %}
         <script>
             riot.mount('*')
+
+            $('.ui.modal').modal('attach events', '#login_button', 'show')
+//            $('#login_button').click(function (e) {
+//                $('.ui.modal').modal('show')
+//            })
         </script>
 
     </body>

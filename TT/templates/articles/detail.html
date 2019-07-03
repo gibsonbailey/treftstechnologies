@@ -26,7 +26,7 @@
         </div>
         <div class="ui horizontal divider"></div>
         <div class="ui centered container">
-            <div class="ui content"></div>
+            <div id="main-content" class="ui content"></div>
         </div>
     </div>
 
@@ -41,5 +41,11 @@
             width: auto;
         }
     </style>
+
+    <script>
+        $(document).ready(function () {
+            $('#main-content').load('{{ object.content_template_url }}')
+        })
+    </script>
 {% endblock content %}
 

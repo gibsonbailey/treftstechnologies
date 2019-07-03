@@ -9,7 +9,7 @@ class ArticleModel(models.Model):
     publish_date = models.DateTimeField(default=timezone.now)
     published = models.BooleanField(default=False)
     slug = models.SlugField(default='article')
-    content_template_name = models.CharField(max_length=100, default='blog_template')
+    content_template_url = models.CharField(max_length=100, default='article_template')
 
     def save(self, **kwargs):
         self.slug = slugify(self.title + " " + str(self.pk))
