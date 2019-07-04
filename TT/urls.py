@@ -4,9 +4,12 @@ from django.conf.urls.static import static
 from django.urls import path, include
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
     path('', include(('pages.urls', 'pages'), namespace='pages')),
+    path('profiles/', include(('profiles.urls', 'profiles'), namespace='profiles')),
     path('articles/', include(('articles.urls', 'articles'), namespace='articles')),
+
+    # Django default
+    path('admin/', admin.site.urls),
     path('accounts/', include(('django.contrib.auth.urls', 'accounts'), namespace='accounts')),
 ]
 

@@ -21,6 +21,8 @@ ALLOWED_HOSTS = ['*']
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 
+AUTH_USER_MODEL = 'profiles.TTUser'
+
 
 # Application definition
 
@@ -34,6 +36,7 @@ INSTALLED_APPS = [
     'django_extensions',
     'pages',
     'articles',
+    'profiles',
 ]
 
 MIDDLEWARE = [

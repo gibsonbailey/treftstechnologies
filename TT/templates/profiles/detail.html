@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+    <div class="ui container">
+        <div class="ui centered two column grid heading">
+            <div class="four wide column">
+                <div class="ui centered medium circular image">
+                    {% if object.portrait %}
+                        <img id="heading-image" src="{{ object.portrait.url }}">
+                    {% else %}
+                        <img id="heading-image" src="{% static "placeholders/square-image.png" %}">
+                    {% endif %}
+                </div>
+            </div>
+            <div class="eight wide column">
+                <h1 class="ui header">
+                    {% if object.is_superuser %}
+                        Welcome, {{ object.username }}, God of Trefts Technologies!
+                    {% else %}
+                        {{ object.username }}
+                    {% endif %}
+                </h1>
+                <div class="ui content">
+                    <p class="description">
+                        {% if object.bio %}
+                            {{ object.bio }}
+                        {% else %}
+                            No bio has been submitted.
+                        {% endif %}
+                    <div class="ui large label">
+                        <i class="edit outline icon"></i>
+                        Edit
+                    </div>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .heading {
+            margin-top: 20vh !important;
+//            width: 50vw !important;
+            font-size: 1.5em;
+        }
+
+        {##heading-image {#}
+        {#    max-height: 45vh;#}
+        {#    width: auto;#}
+        {#}#}
+    </style>
+{% endblock content %}
+

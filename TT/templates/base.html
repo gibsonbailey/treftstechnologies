@@ -103,6 +103,7 @@
             <div class="content">
                 <p>New to Trefts Technologies?  <button type="submit" class="ui inline basic blue button">Sign Up</button></p>
             </div>
+            {% include 'profiles/register.html' %}
         </div>
 
         <div class="navbar">
@@ -116,9 +117,8 @@
                 {% if not user.is_authenticated %}
                 <a id="login_button" class="nav_item" href="#">Login</a>
                 {% else %}
-{#                    <a class="item" href="{% url "profiles:home" %}">{{ user.username }}</a>#}
                     <div class="ui nav_item simple dropdown">
-                        <a class="text user-dropdown-label" href="#">
+                        <a class="text user-dropdown-label" href="{% url "profiles:home" pk=user.pk %}">
                             {% if user.first_name %}
                                 {{ user.first_name}}
                             {% else %}
