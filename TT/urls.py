@@ -7,6 +7,7 @@ urlpatterns = [
     path('', include(('pages.urls', 'pages'), namespace='pages')),
     path('profiles/', include(('profiles.urls', 'profiles'), namespace='profiles')),
     path('articles/', include(('articles.urls', 'articles'), namespace='articles')),
+    path('api/v1/', include(('api.urls', 'api'), namespace='api')),
 
     # Django default
     path('admin/', admin.site.urls),
