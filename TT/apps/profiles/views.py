@@ -1,5 +1,5 @@
 from django.views.generic.detail import DetailView
-from django.contrib.auth.form import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm
 from django.http import Http404
 
 from .models import TTUser

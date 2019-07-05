@@ -1,5 +1,5 @@
 from django.views.generic import TemplateView
-from django.contrib.auth.form import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm
 
 class HomePageView(TemplateView):
     template_name = 'pages/home.html'
