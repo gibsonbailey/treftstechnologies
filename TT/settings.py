@@ -26,7 +26,7 @@ AUTH_USER_MODEL = 'profiles.TTUser'
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-SITE_ID = 2
+SITE_ID = 3
 
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
@@ -172,5 +172,10 @@ LOGGING = {
              'handlers': ['console'],
              'level': 'DEBUG',
          },
-    },
+         'django.template': {
+             'handlers': ['console'],
+             'level': 'INFO',
+             'propagate': False,
+         },
+     },
 }
