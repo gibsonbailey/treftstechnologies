@@ -1,8 +1,10 @@
 {% load static %}
 <html>
     <head>
-        {% if object.title %}
-            <title>{{ object.title }}</title>
+        {% if object %}
+            {% if object.title %}
+                <title>{{ object.title }}</title>
+            {% endif %}
         {% else %}
             {% if page_title %}
                 <title>{{ page_title }} - Trefts Technologes</title>
