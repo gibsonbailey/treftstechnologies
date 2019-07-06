@@ -91,6 +91,9 @@ ENV/
 env.bak/
 venv.bak/
 
+# virtual environment
+uwsgi-django/
+
 # Spyder project settings
 .spyderproject
 .spyproject
@@ -110,3 +113,6 @@ venv.bak/
 # Editor
 .idea/
 .idea
+
+logs/
+

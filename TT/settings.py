@@ -156,3 +156,21 @@ MEDIA_ROOT = '/tmp/TT/media'
 MEDIA_URL = '/media/'
 
 SHELL_PLUS='bpython'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'filters': None,
+            'class': 'logging.StreamHandler',
+        },
+     },
+     'loggers': {
+         'django': {
+             'handlers': ['console'],
+             'level': 'DEBUG',
+         },
+    },
+}
