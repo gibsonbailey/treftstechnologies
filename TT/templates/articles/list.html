@@ -16,7 +16,7 @@
                         <div class="article-content">
                             <div class="content float inverted right publish-date">{{ article.publish_date }}</div>
                             <div class="ui large inverted header">{{ article.title }}</div>
-                            <p>
+                            <p class="article-abstract">
                                 {{ article.abstract }}
                             </p>
                         </div>
@@ -50,6 +50,10 @@
             padding: 40px;
             transition: all 0.1s ease-in;
             font-size: 1.5em;
+        }
+
+        .article-abstract {
+            color: white;
         }
 
         .publish-date {
