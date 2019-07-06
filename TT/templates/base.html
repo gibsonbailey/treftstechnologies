@@ -57,6 +57,12 @@
             <div class="ui divider"></div>
             <div class="content login-element">
                 <p>New to Trefts Technologies?  <button id="registration_menu_selector"class="ui inline basic blue button">Sign Up</button></p>
+                <a href="/accounts/google/login" class="ui inline basic button google-button">
+                    <img class="google-button-icon" src="{% static "icons/google-logo.png" %}">
+                    <p>
+                        Continue with Google
+                    </p>
+                </a>
             </div>
             <div class="content registration-element inactive">
                 <p>Already have an account?  <button id="login_menu_selector" class="ui inline basic blue button">Login</button></p>
@@ -83,7 +89,7 @@
                             {% endif %}
                         </a>
                         <div class="menu">
-                            <a class="item" href="{% url "accounts:logout" %}">Logout</a>
+                            <a class="item" href="{% url "account_logout" %}">Logout</a>
                         </div>
                     </div>
                 {% endif %}
@@ -252,32 +258,6 @@
                     e.preventDefault()
                 })
 
-//                $('#login_form').ajaxForm({
-//                    url: '{% url "api:rest_login" %}',
-//                    dataType: 'json',
-//                    success: function (response) {
-//                        console.info('jquery login form success response: ', response)
-//                        $(location).attr('href', '{% url "pages:home" %}')
-//                    },
-//                    error: function (response) {
-//                        console.info('jquery login form error response: ', response)
-//                    },
-//                })
-//
-//
-//
-//                $('#registration_form').ajaxForm({
-//                    url: '{% url "api:rest_register" %}',
-//                    dataType: 'json',
-//                    success: function (response) {
-//                        console.info('jquery registration form success response: ', response)
-//                        window.location.href = '{% url "pages:home" %}'
-//                    },
-//                    error: function (response) {
-//                        console.info('jquery registration form error response: ', response)
-//                    },
-//                })
-
                 $(document).on('click', '#login_menu_selector', function (e) {
                     $('.registration-element').addClass('inactive')
                     $('.login-element').removeClass('inactive')
@@ -352,6 +332,24 @@
 
             .inactive {
                 display: none !important;
+            }
+
+            .google-button {
+                color: rgba(0, 0, 0, 0.58);
+                display: flex !important;
+                width: 250px;
+            }
+
+            .google-button > p {
+                margin-top: auto;
+                margin-bottom: auto;
+                font-size: 1.1em;
+            }
+
+            .google-button-icon {
+                height: 18px;
+                width: 18px;
+                margin-right: 24px;
             }
 
         </style
