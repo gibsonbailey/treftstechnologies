@@ -31,15 +31,15 @@
                 <form id="login_form" class="ui form" method="post">
                     {% csrf_token %}
                     <div class="field">
-                        <input type="text" name="username" placeholder="Username" maxlength="30" autofocus>
+                        <input type="text" name="username" placeholder="Username" maxlength="30" id="login_username" autofocus>
                     </div>
                     <div class="field">
-                        <input type="password" placeholder="Password" name="password">
+                        <input type="password" placeholder="Password" name="password" id="login_password">
                     </div>
                     <button type="submit" class="ui blue login button">Login</button>
                 </form>
             </div>
-            <div class="content registration-element inactive" id="registration_menu">
+            <div class="content registration-element inactive">
                 <form class="ui form" id="registration_form" method="post">
                     {% csrf_token %}
                     <div class="field">
@@ -123,6 +123,62 @@
             {% endif %}
 
 
+            $('#login_form').form({
+                fields: {
+                    username: {
+                        identifier: 'username',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: 'Please enter a username.',
+                            },
+                        ],
+                    },
+                    password: {
+                        identifier: 'password',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: 'Please enter a password.',
+                            },
+                        ],
+                    },
+                },
+                inline: true,
+                onSuccess: function (e) {
+                    let login_form = $('#login_form')
+                    let data = getFormData(login_form)
+                    let csrf = data.csrfmiddlewaretoken
+                    delete data.csrfmiddlewaretoken
+                    $.ajax({
+                        url: '{% url "api:rest_login" %}',
+                        method : 'POST',
+                        data: login_form.serialize(),
+                        headers: {
+                            'CSRF': csrf,
+                        },
+                    })
+                        .done(function(data) {
+                            console.log('api request success')
+                            window.location.href = '{% url "pages:home" %}'
+                        })
+                        .fail(function (data) {
+                            console.log('api request failure')
+                            let response = data.responseJSON
+                            console.log(response)
+                            for (var field in response) {
+                                if (response.hasOwnProperty(field)) {
+                                    login_form.form('add prompt', 'login_' + field, response[field])
+                                    if (field === 'non_field_errors') {
+                                        console.log(response[field])
+                                        login_form.form('add prompt', 'login_password', response[field])
+                                    }
+                                }
+                            }
+                        })
+                },
+            })
+
             $('#registration_form').form({
                 fields: {
                     username: {
@@ -159,17 +215,10 @@
                 },
                 inline: true,
                 onSuccess: function (e) {
-                    console.log('form success')
-                    console.log(e)
                     let reg_form = $('#registration_form')
                     let data = getFormData(reg_form)
                     let csrf = data.csrfmiddlewaretoken
-                    console.log(data)
-                    console.log(csrf)
                     delete data.csrfmiddlewaretoken
-                    data.email = 'a@bbb.com'
-                    console.log(data)
-                    console.log(csrf)
                     $.ajax({
                         url: '{% url "api:rest_register" %}',
                         method : 'POST',
@@ -180,17 +229,13 @@
                     })
                         .done(function(data) {
                             console.log('api request success')
-                            console.log(data)
                             window.location.href = '{% url "pages:home" %}'
                         })
                         .fail(function (data) {
                             console.log('api request failure')
                             let response = data.responseJSON
-                            console.log(response)
-
                             for (var field in response) {
                                 if (response.hasOwnProperty(field)) {
-                                    console.log(field)
                                     reg_form.form('add prompt', 'registration_' + field, response[field])
                                 }
                             }
