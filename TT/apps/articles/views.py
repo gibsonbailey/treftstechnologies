@@ -2,18 +2,18 @@ from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.http import Http404
 
-from .models import ArticleModel
+from .models import Article
 
 class ArticleListView(ListView):
-    model = ArticleModel
+    model = Article
     template_name = 'articles/list.html'
     ordering = '-publish_date'
 
     def get_queryset(self):
         if self.request.user.is_superuser:
-            return ArticleModel.objects.all()
+            return Article.objects.all()
         else:
-            return ArticleModel.objects.filter(published=True)
+            return Article.objects.filter(published=True)
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
@@ -22,7 +22,7 @@ class ArticleListView(ListView):
 
 
 class ArticleDetailView(DetailView):
-    model = ArticleModel
+    model = Article
     template_name = 'articles/detail.html'
 
     def get_object(self):

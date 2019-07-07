@@ -2,7 +2,7 @@ from django.db import models
 from django.utils import timezone
 from django.utils.text import slugify
 
-class ArticleModel(models.Model):
+class Article(models.Model):
     title = models.CharField(max_length=100)
     abstract = models.TextField()
     thumbnail = models.ImageField(upload_to='article_thumbnails/')
@@ -17,6 +17,8 @@ class ArticleModel(models.Model):
 
     def __str__(self):
         return self.title
+
+
 
 
 
