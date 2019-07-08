@@ -1,0 +1,48 @@
+<comment>
+    <div class="ui row">
+        <div class="ui grid comment-heading">
+            <div class="left floated six wide column">
+                <a class="ui tiny circular image" href="/profiles/{ opts.cmt.author.id }/">
+                    <img src="{ opts.cmt.author.portrait }">
+                </a>
+                <a class="ui header" href="/profiles/{ opts.cmt.author.id }/">
+                    { opts.cmt.author.reference }
+                </a>
+            </div>
+            <div class="floated right six wide column comment-date">
+                { opts.cmt.date_created }
+            </div>
+        </div>
+    </div>
+    <div class="ui divider"></div>
+    <div class="row">
+        <div class="ui content comment-text">
+            { opts.cmt.text }
+        </div>
+    </div>
+    <comment class="ui grid" each="{ reply in opts.cmt.replies }" cmt="{ reply }"></comment>
+    <style>
+        comment {
+            min-height: 60px;
+            width: 80%;
+            margin: 50px !important;
+            border-left: solid #dddddd;
+            padding-left: 45px !important;
+        }
+
+        .comment-heading {
+            width: 100% !important;
+            min-height: 200px;
+        }
+
+        .comment-date {
+            font-size: 1.5em;
+            color: #aaaaaa;
+        }
+
+        .comment-text {
+            background: white;
+        }
+    </style>
+
+</comment>

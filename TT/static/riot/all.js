@@ -1,5 +1,23 @@
+riot.tag2('comment', '<div class="ui row"> <div class="ui grid comment-heading"> <div class="left floated six wide column"> <a class="ui tiny circular image" href="/profiles/{opts.cmt.author.id}/"> <img riot-src="{opts.cmt.author.portrait}"> </a> <a class="ui header" href="/profiles/{opts.cmt.author.id}/"> {opts.cmt.author.reference} </a> </div> <div class="floated right six wide column comment-date"> {opts.cmt.date_created} </div> </div> </div> <div class="ui divider"></div> <div class="row"> <div class="ui content comment-text"> {opts.cmt.text} </div> </div> <comment class="ui grid" each="{reply in opts.cmt.replies}" cmt="{reply}"></comment>', 'comment { min-height: 60px; width: 80%; margin: 50px !important; border-left: solid #dddddd; padding-left: 45px !important; } comment .comment-heading,[data-is="comment"] .comment-heading{ width: 100% !important; min-height: 200px; } comment .comment-date,[data-is="comment"] .comment-date{ font-size: 1.5em; color: #aaaaaa; } comment .comment-text,[data-is="comment"] .comment-text{ background: white; }', '', function(opts) {
+});
+riot.tag2('comment-section', '<comment class="ui grid" each="{comm in comments}" cmt="{comm}"></comment>', '', '', function(opts) {
+        self = this
+
+        self.on('mount', function () {
+            $.ajax({
+                type: 'GET',
+                url: '/api/v1/comments/' + self.opts.article_id + '/',
+                data: null,
+                contentType: 'application/json',
+                dataType: 'json',
+            }).done(function (data) {
+                print(data)
+                self.comments = data
+                self.update()
+            })
+        })
+});
 riot.tag2('perlin', '<canvas id="tutorial"></canvas>', 'perlin canvas,[data-is="perlin"] canvas{ width: 100%; height: 100%; display: block; }', '', function(opts) {
-        print = console.log
 
         this.on('mount', function(){
             const white = 0xFFFFFF;

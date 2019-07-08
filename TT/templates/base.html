@@ -111,6 +111,12 @@
         {% block extra_js %}
         {% endblock extra_js %}
         <script>
+
+            print = function() {
+                var args = Array.prototype.slice.call(arguments);
+                console.log.apply(console, args);
+            }
+
             riot.mount('*')
 
             function getFormData($form){

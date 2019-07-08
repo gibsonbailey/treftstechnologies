@@ -5,18 +5,13 @@ import yaml
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PROJECT_ROOT = os.path.dirname(__file__)
-sys.path.insert(0, os.path.join(PROJECT_ROOT, 'apps'))
+sys.path.insert(0, os.path.join(PROJECT_ROOT, '../apps'))
 
-CONFIG_FILE = os.path.join(PROJECT_ROOT, 'config')
+CONFIG_FILE = os.path.join(PROJECT_ROOT, '../config')
 
 SECRET_KEY = None
 with open(CONFIG_FILE) as f:
     SECRET_KEY = yaml.safe_load(f)['TT']['secret_key']
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
-
-ALLOWED_HOSTS = ['*']
 
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
@@ -28,11 +23,6 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 SITE_ID = 3
 
-if not DEBUG:
-    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-    SECURE_SSL_REDIRECT = True
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
 
 # Application definition
 
@@ -81,7 +71,7 @@ ROOT_URLCONF = 'TT.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(PROJECT_ROOT, 'templates')],
+        'DIRS': [os.path.join(PROJECT_ROOT, '../templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -96,14 +86,13 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'TT.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'NAME': os.path.join(BASE_DIR, '../../db.sqlite3'),
     }
 }
 
@@ -149,7 +138,7 @@ STATIC_URL = '/static/'
 STATIC_ROOT = '/tmp/TT/static'
 
 STATICFILES_DIRS = [
-    os.path.join(PROJECT_ROOT, "static"),
+    os.path.join(PROJECT_ROOT, "../static"),
 ]
 
 MEDIA_ROOT = '/tmp/TT/media'
@@ -157,25 +146,3 @@ MEDIA_URL = '/media/'
 
 SHELL_PLUS='bpython'
 
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'console': {
-            'level': 'DEBUG',
-            'filters': None,
-            'class': 'logging.StreamHandler',
-        },
-     },
-     'loggers': {
-         'django': {
-             'handlers': ['console'],
-             'level': 'DEBUG',
-         },
-         'django.template': {
-             'handlers': ['console'],
-             'level': 'INFO',
-             'propagate': False,
-         },
-     },
-}

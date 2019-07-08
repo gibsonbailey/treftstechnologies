@@ -1,0 +1,20 @@
+<comment-section>
+        <comment class="ui grid" each="{ comm in comments }" cmt="{ comm }"></comment>
+    <script>
+        self = this
+
+        self.on('mount', function () {
+            $.ajax({
+                type: 'GET',
+                url: '/api/v1/comments/' + self.opts.article_id + '/',
+                data: null,
+                contentType: 'application/json',
+                dataType: 'json',
+            }).done(function (data) {
+                print(data)
+                self.comments = data
+                self.update()
+            })
+        })
+    </script>
+</comment-section>

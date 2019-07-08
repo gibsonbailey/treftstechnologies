@@ -27,6 +27,7 @@
         <div class="ui horizontal divider"></div>
         <div class="ui centered container">
             <div id="main-content" class="ui content"></div>
+            <comment-section class="ui grid" article_id="{{ object.pk }}"></comment-section>
         </div>
     </div>
 
@@ -44,7 +45,7 @@
 
     <script>
         $(document).ready(function () {
-            $('#main-content').load('{{ object.content_template_url }}')
+//            $('#main-content').load('{{ object.content_template_url }}')
         })
     </script>
 {% endblock content %}

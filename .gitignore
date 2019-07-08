@@ -115,4 +115,7 @@ uwsgi-django/
 .idea
 
 logs/
-
+env
+django-dev/
+manage.py
+wsgi.py

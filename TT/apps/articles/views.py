@@ -27,6 +27,7 @@ class ArticleDetailView(DetailView):
 
     def get_object(self):
         object = super().get_object()
+        print(object)
         if object.published == False and not self.request.user.is_superuser:
             raise Http404()
         return object
