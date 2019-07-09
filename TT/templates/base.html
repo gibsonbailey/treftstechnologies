@@ -99,6 +99,15 @@
         {% block content %}
         {% endblock content %}
 
+        {% block before_footer %}
+        {% endblock before_footer %}
+
+        <footer class="ui grid">
+            <div class="ui container">
+                <p>&copy {% now 'Y' %} Trefts Technologies LLC, All Rights Reserved</p>
+            </div>
+        <footer/>
+
         <script src="{% static "riot/bower_components/riot/riot.min.js" %}"></script>
         <script src="{% static "riot/all.js" %}"></script>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
@@ -279,6 +288,8 @@
             html, body {
                 font-family: 'Roboto', sans-serif;
                 font-weight: light;
+                position: relative;
+                padding-bottom: 6rem;
             }
 
             .navbar {
@@ -356,6 +367,22 @@
                 height: 18px;
                 width: 18px;
                 margin-right: 24px;
+            }
+
+            footer {
+                position: absolute;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: black;
+                color: white;
+                min-height: 100px;
+            }
+
+            footer .container {
+                display: flex !important;
+                flex-direction: column;
+                justify-content: center;
             }
 
         </style

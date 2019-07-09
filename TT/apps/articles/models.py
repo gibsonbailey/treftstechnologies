@@ -37,7 +37,7 @@ class Comment(models.Model):
         super().save(**kwargs)
 
     def __str__(self):
-        return self.author.username + ": " + self.article.title
+        return self.text.split(' ')[0]
 
 class CommentObjection(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='objections')

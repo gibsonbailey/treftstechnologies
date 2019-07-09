@@ -27,8 +27,8 @@
         <div class="ui horizontal divider"></div>
         <div class="ui centered container">
             <div id="main-content" class="ui content"></div>
-            <comment-section class="ui grid" article_id="{{ object.pk }}"></comment-section>
         </div>
+
     </div>
 
     <style>
@@ -50,3 +50,6 @@
     </script>
 {% endblock content %}
 
+{% block before_footer %}
+    <comment-section class="ui grid" article_id="{{ object.pk }}"></comment-section>
+{% endblock before_footer %}

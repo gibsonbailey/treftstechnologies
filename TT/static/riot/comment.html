@@ -1,16 +1,22 @@
 <comment>
     <div class="ui row">
         <div class="ui grid comment-heading">
-            <div class="left floated six wide column">
+            <div class="two wide column">
                 <a class="ui tiny circular image" href="/profiles/{ opts.cmt.author.id }/">
                     <img src="{ opts.cmt.author.portrait }">
                 </a>
-                <a class="ui header" href="/profiles/{ opts.cmt.author.id }/">
-                    { opts.cmt.author.reference }
-                </a>
             </div>
-            <div class="floated right six wide column comment-date">
-                { opts.cmt.date_created }
+            <div class="eight wide column">
+                <div class="ui header header-text-container">
+                    <div class="content header-text">
+                        <a href="/profiles/{ opts.cmt.author.id }/">
+                            { opts.cmt.author.reference }
+                        </a>
+                        <div class="sub header comment-date">
+                            { opts.cmt.date_created }
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -20,28 +26,56 @@
             { opts.cmt.text }
         </div>
     </div>
-    <comment class="ui grid" each="{ reply in opts.cmt.replies }" cmt="{ reply }"></comment>
+    <comment class="ui grid reply" each="{ reply in opts.cmt.replies }" cmt="{ reply }"></comment>
     <style>
         comment {
             min-height: 60px;
             width: 80%;
-            margin: 50px !important;
-            border-left: solid #dddddd;
-            padding-left: 45px !important;
+            margin: 30px !important;
+            padding: 20px 45px 20px 45px !important;
+            background: white;
+            border-radius: 5px;
         }
+
+        .reply {
+            border-left: solid #dddddd;
+            border-radius: 1px !important;
+            padding-top: 0 !important;
+            padding-bottom: 0 !important;
+        }
+
 
         .comment-heading {
             width: 100% !important;
-            min-height: 200px;
+            min-height: 80px;
+        }
+
+        .reply .comment-heading {
+            min-height: 65px;
+        }
+
+        .header-text {
+            height: 70px;
+        }
+
+        .reply .header-text {
+            height: 50px;
+        }
+
+        .header-text {
+            display: flex !important;
+            flex-direction: column;
+            justify-content: space-between;
         }
 
         .comment-date {
-            font-size: 1.5em;
+            font-size: 1.0em !important;
             color: #aaaaaa;
         }
 
         .comment-text {
             background: white;
+            font-size: 2.0em;
         }
     </style>
 

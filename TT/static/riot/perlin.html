@@ -31,11 +31,16 @@
             //scene.background = new THREE.Color(0x222222)
             scene.background = new THREE.Color(white)
 
-            if(window.devicePixelRatio <= 2) {
-                renderer.setPixelRatio(window.devicePixelRatio);
-            } else {
-                renderer.setPixelRatio(2);
+            let max_pixel_ratio = 4
+            let min_pixel_ratio = 2
+            let pixel_ratio = window.devicePixelRatio
+            if(pixel_ratio < min_pixel_ratio) {
+                pixel_ratio = min_pixel_ratio
+            } else if (pixel_ratio > max_pixel_ratio) {
+                pixel_ratio = max_pixel_ratio
             }
+            renderer.setPixelRatio(pixel_ratio);
+            print('pixel ratio:', pixel_ratio)
 
 
             const w = 4

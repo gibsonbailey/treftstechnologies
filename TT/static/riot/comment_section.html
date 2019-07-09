@@ -1,5 +1,7 @@
 <comment-section>
+    <div class="ui container">
         <comment class="ui grid" each="{ comm in comments }" cmt="{ comm }"></comment>
+    </div>
     <script>
         self = this
 
@@ -17,4 +19,9 @@
             })
         })
     </script>
+    <style>
+        comment-section {
+            background: #21324d;
+        }
+    </style>
 </comment-section>

@@ -1,6 +1,6 @@
-riot.tag2('comment', '<div class="ui row"> <div class="ui grid comment-heading"> <div class="left floated six wide column"> <a class="ui tiny circular image" href="/profiles/{opts.cmt.author.id}/"> <img riot-src="{opts.cmt.author.portrait}"> </a> <a class="ui header" href="/profiles/{opts.cmt.author.id}/"> {opts.cmt.author.reference} </a> </div> <div class="floated right six wide column comment-date"> {opts.cmt.date_created} </div> </div> </div> <div class="ui divider"></div> <div class="row"> <div class="ui content comment-text"> {opts.cmt.text} </div> </div> <comment class="ui grid" each="{reply in opts.cmt.replies}" cmt="{reply}"></comment>', 'comment { min-height: 60px; width: 80%; margin: 50px !important; border-left: solid #dddddd; padding-left: 45px !important; } comment .comment-heading,[data-is="comment"] .comment-heading{ width: 100% !important; min-height: 200px; } comment .comment-date,[data-is="comment"] .comment-date{ font-size: 1.5em; color: #aaaaaa; } comment .comment-text,[data-is="comment"] .comment-text{ background: white; }', '', function(opts) {
+riot.tag2('comment', '<div class="ui row"> <div class="ui grid comment-heading"> <div class="two wide column"> <a class="ui tiny circular image" href="/profiles/{opts.cmt.author.id}/"> <img riot-src="{opts.cmt.author.portrait}"> </a> </div> <div class="eight wide column"> <div class="ui header header-text-container"> <div class="content header-text"> <a href="/profiles/{opts.cmt.author.id}/"> {opts.cmt.author.reference} </a> <div class="sub header comment-date"> {opts.cmt.date_created} </div> </div> </div> </div> </div> </div> <div class="ui divider"></div> <div class="row"> <div class="ui content comment-text"> {opts.cmt.text} </div> </div> <comment class="ui grid reply" each="{reply in opts.cmt.replies}" cmt="{reply}"></comment>', 'comment { min-height: 60px; width: 80%; margin: 30px !important; padding: 20px 45px 20px 45px !important; background: white; border-radius: 5px; } comment .reply,[data-is="comment"] .reply{ border-left: solid #dddddd; border-radius: 1px !important; padding-top: 0 !important; padding-bottom: 0 !important; } comment .comment-heading,[data-is="comment"] .comment-heading{ width: 100% !important; min-height: 80px; } comment .reply .comment-heading,[data-is="comment"] .reply .comment-heading{ min-height: 65px; } comment .header-text,[data-is="comment"] .header-text{ height: 70px; } comment .reply .header-text,[data-is="comment"] .reply .header-text{ height: 50px; } comment .header-text,[data-is="comment"] .header-text{ display: flex !important; flex-direction: column; justify-content: space-between; } comment .comment-date,[data-is="comment"] .comment-date{ font-size: 1.0em !important; color: #aaaaaa; } comment .comment-text,[data-is="comment"] .comment-text{ background: white; font-size: 2.0em; }', '', function(opts) {
 });
-riot.tag2('comment-section', '<comment class="ui grid" each="{comm in comments}" cmt="{comm}"></comment>', '', '', function(opts) {
+riot.tag2('comment-section', '<div class="ui container"> <comment class="ui grid" each="{comm in comments}" cmt="{comm}"></comment> </div>', 'comment-section { background: #21324d; }', '', function(opts) {
         self = this
 
         self.on('mount', function () {
@@ -44,11 +44,16 @@ riot.tag2('perlin', '<canvas id="tutorial"></canvas>', 'perlin canvas,[data-is="
 
             scene.background = new THREE.Color(white)
 
-            if(window.devicePixelRatio <= 2) {
-                renderer.setPixelRatio(window.devicePixelRatio);
-            } else {
-                renderer.setPixelRatio(2);
+            let max_pixel_ratio = 4
+            let min_pixel_ratio = 2
+            let pixel_ratio = window.devicePixelRatio
+            if(pixel_ratio < min_pixel_ratio) {
+                pixel_ratio = min_pixel_ratio
+            } else if (pixel_ratio > max_pixel_ratio) {
+                pixel_ratio = max_pixel_ratio
             }
+            renderer.setPixelRatio(pixel_ratio);
+            print('pixel ratio:', pixel_ratio)
 
             const w = 4
             const h = 4
