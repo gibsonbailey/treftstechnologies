@@ -51,5 +51,5 @@
 {% endblock content %}
 
 {% block before_footer %}
-    <comment-section class="ui grid" article_id="{{ object.pk }}"></comment-section>
+    <comment-section class="ui grid" csrf="{{ csrf_token }}"  article_id="{{ object.pk }}"></comment-section>
 {% endblock before_footer %}

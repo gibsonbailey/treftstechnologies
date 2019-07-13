@@ -1,12 +1,40 @@
-riot.tag2('comment', '<div class="ui row"> <div class="ui grid comment-heading"> <div class="two wide column"> <a class="ui tiny circular image" href="/profiles/{opts.cmt.author.id}/"> <img riot-src="{opts.cmt.author.portrait}"> </a> </div> <div class="eight wide column"> <div class="ui header header-text-container"> <div class="content header-text"> <a href="/profiles/{opts.cmt.author.id}/"> {opts.cmt.author.reference} </a> <div class="sub header comment-date"> {opts.cmt.date_created} </div> </div> </div> </div> </div> </div> <div class="ui divider"></div> <div class="row"> <div class="ui content comment-text"> {opts.cmt.text} </div> </div> <comment class="ui grid reply" each="{reply in opts.cmt.replies}" cmt="{reply}"></comment>', 'comment { min-height: 60px; width: 80%; margin: 30px !important; padding: 20px 45px 20px 45px !important; background: white; border-radius: 5px; } comment .reply,[data-is="comment"] .reply{ border-left: solid #dddddd; border-radius: 1px !important; padding-top: 0 !important; padding-bottom: 0 !important; } comment .comment-heading,[data-is="comment"] .comment-heading{ width: 100% !important; min-height: 80px; } comment .reply .comment-heading,[data-is="comment"] .reply .comment-heading{ min-height: 65px; } comment .header-text,[data-is="comment"] .header-text{ height: 70px; } comment .reply .header-text,[data-is="comment"] .reply .header-text{ height: 50px; } comment .header-text,[data-is="comment"] .header-text{ display: flex !important; flex-direction: column; justify-content: space-between; } comment .comment-date,[data-is="comment"] .comment-date{ font-size: 1.0em !important; color: #aaaaaa; } comment .comment-text,[data-is="comment"] .comment-text{ background: white; font-size: 2.0em; }', '', function(opts) {
+riot.tag2('comment', '<div class="ui row"> <div class="ui grid comment-heading"> <div class="two wide column"> <a class="ui tiny circular image" href="/profiles/{opts.cmt.author.id}/"> <img riot-src="{opts.cmt.author.portrait}"> </a> </div> <div class="eight wide column"> <div class="ui header header-text-container"> <div class="content header-text"> <a href="/profiles/{opts.cmt.author.id}/"> {opts.cmt.author.reference} </a> <div class="sub header comment-date"> {opts.cmt.date_created} </div> </div> </div> </div> </div> </div> <div class="ui divider"></div> <div class="row content"> <div class="ui content comment-text"> {opts.cmt.text} </div> </div> <comment class="ui grid reply" each="{reply in opts.cmt.replies}" cmt="{reply}"></comment> <div if="{!opts.cmt.parent}" class="ui form"> <div class="field"> <input type="text" name="reply" placeholder="Write a reply..."> </div> </div>', 'comment { min-height: 60px; width: 80%; margin: 30px !important; padding: 20px 45px 20px 45px !important; background: white; border-radius: 5px; } comment .reply,[data-is="comment"] .reply{ margin: 15px !important; background: #eeeeee; border-radius: 4px !important; padding-top: 0 !important; padding-bottom: 0 !important; } comment .comment-heading,[data-is="comment"] .comment-heading{ width: 100% !important; min-height: 80px; } comment .reply .comment-heading,[data-is="comment"] .reply .comment-heading{ min-height: 65px; } comment .header-text,[data-is="comment"] .header-text{ height: 70px; } comment .reply .header-text,[data-is="comment"] .reply .header-text{ height: 50px; } comment .header-text,[data-is="comment"] .header-text{ display: flex !important; flex-direction: column; justify-content: space-between; text-align: start; } comment .comment-date,[data-is="comment"] .comment-date{ font-size: 1.0em !important; color: #aaaaaa; } comment .comment-text,[data-is="comment"] .comment-text{ // background: white; font-size: 1.3em; } comment .row.content,[data-is="comment"] .row.content{ display: flex; justify-content: start !important; }', '', function(opts) {
 });
-riot.tag2('comment-section', '<div class="ui container"> <comment class="ui grid" each="{comm in comments}" cmt="{comm}"></comment> </div>', 'comment-section { background: #21324d; }', '', function(opts) {
+riot.tag2('comment-section', '<div class="ui container"> <comment class="ui centered grid outer-comment" each="{comm in comments}" cmt="{comm}"></comment> <div class="ui massive blue button" ref="clikky">clikky</div> </div>', 'comment-section { background: #21324d; } comment-section .outer-comment,[data-is="comment-section"] .outer-comment{ width: 70% !important; margin-left: auto !important; margin-right: auto !important; }', '', function(opts) {
         self = this
 
         self.on('mount', function () {
+            self.get_comments()
+            $(self.refs.clikky).on('click', function (data) {
+                let post_data = {
+                    "text": "API Comment",
+                    "parent": 1,
+                    "author": 1,
+                    "article": 1,
+                }
+                $.ajax({
+                    type: 'POST',
+                    url: '/api/v1/comments/',
+                    data: JSON.stringify(post_data),
+                    contentType: 'application/json',
+                    dataType: 'json',
+                    headers: {
+                        'X-CSRFToken': self.opts.csrf,
+                    },
+                })
+                .done(function (data) {
+                    self.get_comments()
+                })
+                .fail(function (data) {
+                    print('comments clikky error:', data)
+                })
+            })
+        })
+
+        self.get_comments = function () {
             $.ajax({
                 type: 'GET',
-                url: '/api/v1/comments/' + self.opts.article_id + '/',
+                url: '/api/v1/article_comments/' + self.opts.article_id + '/',
                 data: null,
                 contentType: 'application/json',
                 dataType: 'json',
@@ -15,7 +43,7 @@ riot.tag2('comment-section', '<div class="ui container"> <comment class="ui grid
                 self.comments = data
                 self.update()
             })
-        })
+        }
 });
 riot.tag2('perlin', '<canvas id="tutorial"></canvas>', 'perlin canvas,[data-is="perlin"] canvas{ width: 100%; height: 100%; display: block; }', '', function(opts) {
 

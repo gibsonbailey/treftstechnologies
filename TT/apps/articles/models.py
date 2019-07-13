@@ -8,6 +8,7 @@ User = get_user_model()
 
 class Article(models.Model):
     title = models.CharField(max_length=100)
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='articles')
     abstract = models.TextField()
     thumbnail = models.ImageField(upload_to='article_thumbnails/')
     publish_date = models.DateTimeField(default=timezone.now)

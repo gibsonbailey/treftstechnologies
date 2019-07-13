@@ -102,11 +102,13 @@
         {% block before_footer %}
         {% endblock before_footer %}
 
+        <div class="footer-spacer"></div>
+
         <footer class="ui grid">
             <div class="ui container">
-                <p>&copy {% now 'Y' %} Trefts Technologies LLC, All Rights Reserved</p>
+                <p class="center">&copy {% now 'Y' %} Trefts Technologies LLC, All Rights Reserved</p>
             </div>
-        <footer/>
+        </footer>
 
         <script src="{% static "riot/bower_components/riot/riot.min.js" %}"></script>
         <script src="{% static "riot/all.js" %}"></script>
@@ -282,6 +284,11 @@
                     $('.login-element').addClass('inactive')
                     $('.registration-element').removeClass('inactive')
                 })
+
+                let login_form = $('#login_form')
+                let data = getFormData(login_form)
+                let csrf = data.csrfmiddlewaretoken
+                print(csrf)
             })
         </script>
         <style>
@@ -289,8 +296,9 @@
                 font-family: 'Roboto', sans-serif;
                 font-weight: light;
                 position: relative;
-                padding-bottom: 6rem;
+                height: auto;
             }
+
 
             .navbar {
                 display: flex;
@@ -350,6 +358,10 @@
             .inactive {
                 display: none !important;
             }
+            
+            .center {
+                text-align: center;
+            }
 
             .google-button {
                 color: rgba(0, 0, 0, 0.58);
@@ -371,12 +383,17 @@
 
             footer {
                 position: absolute;
+                bottom: 0;
                 left: 0;
                 right: 0;
-                bottom: 0;
                 background: black;
                 color: white;
                 min-height: 100px;
+            }
+
+            .footer-spacer {
+                background: none;
+                height: 300px;
             }
 
             footer .container {

@@ -1,14 +1,43 @@
 <comment-section>
     <div class="ui container">
-        <comment class="ui grid" each="{ comm in comments }" cmt="{ comm }"></comment>
+        <comment class="ui centered grid outer-comment" each="{ comm in comments }" cmt="{ comm }"></comment>
+        <div class="ui massive blue button" ref="clikky">clikky</div>
     </div>
     <script>
         self = this
 
         self.on('mount', function () {
+            self.get_comments()
+            $(self.refs.clikky).on('click', function (data) {
+                let post_data = {
+                    "text": "API Comment",
+                    "parent": 1,
+                    "author": 1,
+                    "article": 1,
+                }
+                $.ajax({
+                    type: 'POST',
+                    url: '/api/v1/comments/',
+                    data: JSON.stringify(post_data),
+                    contentType: 'application/json',
+                    dataType: 'json',
+                    headers: {
+                        'X-CSRFToken': self.opts.csrf,
+                    },
+                })
+                .done(function (data) {
+                    self.get_comments()
+                })
+                .fail(function (data) {
+                    print('comments clikky error:', data)
+                })
+            })
+        })
+
+        self.get_comments = function () {
             $.ajax({
                 type: 'GET',
-                url: '/api/v1/comments/' + self.opts.article_id + '/',
+                url: '/api/v1/article_comments/' + self.opts.article_id + '/',
                 data: null,
                 contentType: 'application/json',
                 dataType: 'json',
@@ -17,11 +46,17 @@
                 self.comments = data
                 self.update()
             })
-        })
+        }
     </script>
     <style>
         comment-section {
             background: #21324d;
+        }
+
+        .outer-comment {
+            width: 70% !important;
+            margin-left: auto !important;
+            margin-right: auto !important;
         }
     </style>
 </comment-section>
