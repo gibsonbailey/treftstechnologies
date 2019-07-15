@@ -51,5 +51,21 @@
 {% endblock content %}
 
 {% block before_footer %}
+    <div class="ui basic modal">
+        <div class="ui icon header">
+            <i class="trash icon"></i>
+            Are you sure you would like to delete this comment?
+        </div>
+        <div class="actions" style="display: flex; justify-content: center;">
+            <div class="ui gray basic cancel inverted button">
+                <i class="remove icon"></i>
+                Do not Delete
+            </div>
+            <div class="ui red ok inverted button">
+                <i class="checkmark icon"></i>
+                Delete
+            </div>
+        </div>
+    </div>
     <comment-section class="ui grid" csrf="{{ csrf_token }}"  author_id="{{ user.pk }}"article_id="{{ object.pk }}"></comment-section>
 {% endblock before_footer %}

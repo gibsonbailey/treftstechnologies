@@ -19,7 +19,7 @@
                 </div>
             </div>
             <div class="six wide column">
-                <div if={ opts.cmt.author.id == opts.author_id } class="ui right floated mini button delete-button" data-pk="{ opts.cmt.id }" id="delete-comment-{ opts.cmt.id }">
+                <div if={ opts.cmt.author.id == opts.author_id } class="ui right floated mini button delete-button" id="delete-comment-{ opts.cmt.id }">
                     <i class="black delete icon"></i>
                 </div>
             </div>
@@ -34,53 +34,50 @@
     <comment class="ui grid reply" each="{ reply in opts.cmt.replies }" csrf="{ self.opts.csrf }" author_id="{ self.opts.author_id }"cmt="{ reply }"></comment>
     <form if={ !opts.cmt.parent } class="ui form replyform">
         <div class="field">
-            <textarea id='reply-text-area-{ opts.cmt.pk }' rows='2' type="text" name="reply" placeholder="Write a reply..."></textarea>
+            <textarea id='reply-text-area-{ opts.cmt.id }' rows='2' type="text" name="reply" placeholder="Write a reply..."></textarea>
         </div>
     </form>
     <script>
         self = this
 
-        function delete_comment(pk, csrf_token) {
-            $.ajax({
-                type: 'DELETE',
-                url: '/api/v1/comments/' + pk,
-                data: JSON.stringify(null),
-                contentType: 'application/json',
-                dataType: 'json',
-                headers: {
-                    'X-CSRFToken': csrf_token,
-                },
+        function text_area_behavior(el, disabled) {
+            el.keydown(function (e) {
+                if (disabled) {
+                    $(this).val(function (i, val) {
+                        return ''
+                    })
+                } else {
+                    if ((e.keyCode == 10 || e.keyCode == 13) && e.ctrlKey) {
+                        $(this).val(function (i, val) {
+                            let pos = e.target.selectionStart
+                            let spliced_string = val.slice(0, pos) + '\n' + val.slice(pos)
+                            return spliced_string
+                        })
+                    } else if (e.keyCode === 13 && !e.ctrlKey) {
+                        e.preventDefault()
+                        let text = $(this).val()
+                        self.post_comment(text, opts.author_id, opts.cmt.article, opts.cmt.id, opts.csrf)
+                    }
+                }
             })
-                .done(function (data) {
-                    TT.events.trigger('comment_posted', null)
-                })
-                .fail(function (data) {
-                    print('comment post error:', data)
-                })
         }
 
         self.on('mount', function () {
-            let id = '#reply-text-area-' + opts.cmt.pk
+            let id = '#reply-text-area-' + opts.cmt.id
             let reply_form = $(id)
-
-            reply_form.keydown(function (e) {
-                if ((e.keyCode == 10 || e.keyCode == 13) && e.ctrlKey) {
-                    $(this).val(function (i, val) {
-                        let pos = e.target.selectionStart
-                        let spliced_string = val.slice(0, pos) + '\n' + val.slice(pos)
-                        return spliced_string
-                    })
-                } else if (e.keyCode === 13 && !e.ctrlKey) {
-                    e.preventDefault()
-                    let text = $(this).val()
-                    self.post_comment(text, opts.author_id, opts.cmt.article, opts.cmt.pk, opts.csrf)
-                }
-            })
+            if (opts.author_id == 'None') {
+                text_area_behavior(reply_form, true)
+                reply_form.on('click', function (e){
+                    $('#login_menu').click()
+                })
+            } else {
+                text_area_behavior(reply_form, false)
+            }
             let delete_button = $('#delete-comment-' + opts.cmt.id)
             delete_button.on('click', function (e) {
                 print(e.target)
                 let pk = opts.cmt.id
-                delete_comment(pk, opts.csrf)
+                TT.events.trigger('comment_delete', pk)
             })
         })
 
@@ -184,6 +181,11 @@
 
         .black.delete.icon {
             margin: auto !important;
+        }
+
+        .delete-options {
+            display: flex !important;
+            justify-content: center;
         }
     </style>
 

@@ -30,9 +30,9 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ('pk', 'article', 'author', 'date_created', 'text', 'replies', 'parent','article_id', 'author_id', 'parent_id')
+        fields = ('id', 'article', 'author', 'date_created', 'text', 'replies', 'parent','article_id', 'author_id', 'parent_id')
         depth = 3
-        read_only_fields = ('pk', 'date_created', 'replies', 'author', 'parent', 'article')
+        read_only_fields = ('id', 'date_created', 'replies', 'author', 'parent', 'article')
 
     def create(self, validated_data):
         print(validated_data)
