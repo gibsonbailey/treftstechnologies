@@ -41,11 +41,18 @@
             max-height: 45vh;
             width: auto;
         }
+
+        #main-content {
+            margin: 40px auto 120px auto;
+        }
     </style>
 
     <script>
         $(document).ready(function () {
-//            $('#main-content').load('{{ object.content_template_url }}')
+            $.get('/static/markdown/{{ object.title }}.md', function (data) {
+                rendered_markdown = marked(data)
+                $('#main-content').html(rendered_markdown)
+            })
         })
     </script>
 {% endblock content %}

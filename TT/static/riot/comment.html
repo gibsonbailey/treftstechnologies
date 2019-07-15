@@ -19,7 +19,7 @@
                 </div>
             </div>
             <div class="six wide column">
-                <div if={ opts.cmt.author.id == opts.author_id } class="ui right floated mini button delete-button" id="delete-comment-{ opts.cmt.id }">
+                <div if={ opts.cmt.author.id == TT.user_pk } class="ui right floated mini button delete-button" id="delete-comment-{ opts.cmt.id }">
                     <i class="black delete icon"></i>
                 </div>
             </div>
@@ -31,14 +31,14 @@
             { opts.cmt.text }
         </div>
     </div>
-    <comment class="ui grid reply" each="{ reply in opts.cmt.replies }" csrf="{ self.opts.csrf }" author_id="{ self.opts.author_id }"cmt="{ reply }"></comment>
+    <comment class="ui grid reply" each="{ reply in opts.cmt.replies }" cmt="{ reply }"></comment>
     <form if={ !opts.cmt.parent } class="ui form replyform">
         <div class="field">
             <textarea id='reply-text-area-{ opts.cmt.id }' rows='2' type="text" name="reply" placeholder="Write a reply..."></textarea>
         </div>
     </form>
     <script>
-        self = this
+        var self = this
 
         function text_area_behavior(el, disabled) {
             el.keydown(function (e) {
@@ -56,16 +56,17 @@
                     } else if (e.keyCode === 13 && !e.ctrlKey) {
                         e.preventDefault()
                         let text = $(this).val()
-                        self.post_comment(text, opts.author_id, opts.cmt.article, opts.cmt.id, opts.csrf)
+                        self.post_comment(text, self.opts.cmt.article, self.opts.cmt.id)
                     }
                 }
             })
         }
 
         self.on('mount', function () {
-            let id = '#reply-text-area-' + opts.cmt.id
+            print('self', self)
+            let id = '#reply-text-area-' + self.opts.cmt.id
             let reply_form = $(id)
-            if (opts.author_id == 'None') {
+            if (TT.user_pk == 'None') {
                 text_area_behavior(reply_form, true)
                 reply_form.on('click', function (e){
                     $('#login_menu').click()
@@ -73,7 +74,7 @@
             } else {
                 text_area_behavior(reply_form, false)
             }
-            let delete_button = $('#delete-comment-' + opts.cmt.id)
+            let delete_button = $('#delete-comment-' + self.opts.cmt.id)
             delete_button.on('click', function (e) {
                 print(e.target)
                 let pk = opts.cmt.id
@@ -81,13 +82,15 @@
             })
         })
 
-        self.post_comment = function (text, author_pk, article_pk, parent_pk, csrf_token) {
+        self.post_comment = function (text, article_pk, parent_pk) {
             let post_data = {
                 "text": text,
                 "parent": parent_pk,
-                "author": author_pk,
+                "author": TT.user_pk,
                 "article": article_pk,
             }
+
+            print(post_data)
 
             $.ajax({
                 type: 'POST',
@@ -95,12 +98,9 @@
                 data: JSON.stringify(post_data),
                 contentType: 'application/json',
                 dataType: 'json',
-                headers: {
-                    'X-CSRFToken': csrf_token,
-                },
             })
             .done(function (data) {
-                TT.events.trigger('comment_posted', null)
+                TT.events.trigger('comment_posted', false)
             })
             .fail(function (data) {
                 print('comment post error:', data)

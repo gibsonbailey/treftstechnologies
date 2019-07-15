@@ -5,41 +5,38 @@
                 <textarea rows='3' type="text" name="comment" placeholder="Respond with a comment..." ref="comment_textarea"></textarea>
             </div>
         </form>
-        <comment class="ui centered grid outer-comment" csrf="{ comsec.opts.csrf }" author_id="{ comsec.opts.author_id }" each="{ comm in comments }" cmt="{ comm }"></comment>
+        <comment class="ui centered grid outer-comment" each="{ comm in comments }" cmt="{ comm }"></comment>
     </div>
     <script>
-        comsec = this
+        var self = this
 
         function get_comments(scroll) {
             $.ajax({
                 type: 'GET',
-                url: '/api/v1/article_comments/' + opts.article_id + '/',
+                url: '/api/v1/article_comments/' + self.opts.article_id + '/',
                 data: null,
                 contentType: 'application/json',
                 dataType: 'json',
             }).done(function (data) {
-                comsec.comments = data
+                self.comments = data
                 print(data)
-                comsec.update()
+                self.update()
                 if (scroll) {
                     $('html,body').animate({scrollTop: document.body.scrollHeight}, 350);
                 }
             })
         }
 
-        function delete_comment(pk, csrf_token) {
+        function delete_comment(pk) {
             $.ajax({
                 type: 'DELETE',
                 url: '/api/v1/comments/' + pk,
                 data: JSON.stringify(null),
                 contentType: 'application/json',
                 dataType: 'json',
-                headers: {
-                    'X-CSRFToken': csrf_token,
-                },
             })
                 .done(function (data) {
-                    TT.events.trigger('comment_posted', null)
+                    TT.events.trigger('comment_posted', false)
                 })
                 .fail(function (data) {
                     print('comment post error:', data)
@@ -47,15 +44,14 @@
         }
 
 
-        comsec.post_comment = function (text, author_pk, article_pk) {
+        self.post_comment = function (text, article_pk) {
             let post_data = {
                 text: text,
-                author: comsec.opts.author_id,
-                article: comsec.opts.article_id,
+                author: TT.user_pk,
+                article: self.opts.article_id,
                 parent: null,
             }
             print('post data', post_data)
-            print('csrf', comsec.opts.csrf)
 
             $.ajax({
                 type: 'POST',
@@ -63,12 +59,10 @@
                 data: JSON.stringify(post_data),
                 contentType: 'application/json',
                 dataType: 'json',
-                headers: {
-                    'X-CSRFToken': comsec.opts.csrf,
-                },
             })
                 .done(function (data) {
-                    TT.events.trigger('comment_posted', null)
+                    print(data)
+                    TT.events.trigger('comment_posted', true)
                 })
                 .fail(function (data) {
                     print('comment post error:', data)
@@ -91,7 +85,7 @@
                     } else if (e.keyCode === 13 && !e.ctrlKey) {
                         e.preventDefault()
                         let text = $(this).val()
-                        comsec.post_comment(text)
+                        self.post_comment(text)
                         $(this).val(function (i, val) {
                             return ''
                         })
@@ -100,10 +94,10 @@
                 }
             })
         }
-        comsec.on('mount', function () {
+        self.on('mount', function () {
             print('comment section opts', opts)
-            let comment_input = $(comsec.refs.comment_textarea)
-            if (comsec.opts.author_id == 'None') {
+            let comment_input = $(self.refs.comment_textarea)
+            if (TT.user_pk == 'None') {
                 text_area_behavior(comment_input, true)
                 comment_input.on('click', function (e){
                     $('#login_menu').click()
@@ -114,16 +108,16 @@
             get_comments(false)
         })
 
-        TT.events.on('comment_posted', function() {
+        TT.events.on('comment_posted', function(scroll) {
             print('comment posted from comment-section')
-            get_comments(true)
+            get_comments(scroll)
         })
 
         TT.events.on('comment_delete', function (pk) {
             $('.ui.basic.modal')
                 .modal({
                     onApprove: function () {
-                        delete_comment(pk, opts.csrf)
+                        delete_comment(pk)
                     }
                 })
                 .modal('show')

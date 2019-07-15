@@ -42,14 +42,28 @@
     <style>
         .heading {
             margin-top: 20vh !important;
-//            width: 50vw !important;
             font-size: 1.5em;
         }
 
-        {##heading-image {#}
-        {#    max-height: 45vh;#}
-        {#    width: auto;#}
-        {#}#}
     </style>
+    <script>
+
+    $(document).ready( function () {
+        $.ajax({
+            url: '/api/v1/users/' + 1 + '/',
+            data: JSON.stringify({first_name: 'baylee'}),
+            method: 'PATCH',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+            }
+        })
+            .done( function (data) {
+                console.log(data)
+            })
+            .fail( function (data) {
+                console.log(data)
+            })
+    })
+    </script>
 {% endblock content %}
 

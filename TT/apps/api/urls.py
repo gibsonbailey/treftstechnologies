@@ -6,6 +6,7 @@ from . import views
 
 router = SimpleRouter()
 router.register('comments', views.CommentViewSet)
+router.register('users', views.UserViewSet)
 
 print('router', router.urls)
 
@@ -19,5 +20,3 @@ urlpatterns = [
     path('auth/registration/', include('rest_auth.registration.urls')),
     path('', schema_view)
 ]
-
-#urlpatterns += router.urls

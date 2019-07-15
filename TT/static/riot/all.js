@@ -1,5 +1,5 @@
-riot.tag2('comment', '<div class="ui row"> <div class="ui grid comment-heading"> <div class="two wide column"> <a class="ui tiny circular image" href="/profiles/{opts.cmt.author.id}/"> <img riot-src="{opts.cmt.author.portrait}"> </a> </div> <div class="eight wide column"> <div class="ui header header-text-container"> <div class="content header-text"> <a href="/profiles/{opts.cmt.author.id}/"> {opts.cmt.author.reference} </a> <div class="sub header comment-date"> {format_datestring(opts.cmt.date_created)} </div> </div> </div> </div> <div class="six wide column"> <div if="{opts.cmt.author.id == opts.author_id}" class="ui right floated mini button delete-button" id="delete-comment-{opts.cmt.id}"> <i class="black delete icon"></i> </div> </div> </div> </div> <div class="ui divider"></div> <div class="row content"> <div class="ui content comment-text"> {opts.cmt.text} </div> </div> <comment class="ui grid reply" each="{reply in opts.cmt.replies}" csrf="{self.opts.csrf}" author_id="{self.opts.author_id}" cmt="{reply}"></comment> <form if="{!opts.cmt.parent}" class="ui form replyform"> <div class="field"> <textarea id="reply-text-area-{opts.cmt.id}" rows="2" type="text" name="reply" placeholder="Write a reply..."></textarea> </div> </form>', 'comment { min-height: 60px; width: 80%; margin: 30px !important; padding: 20px 45px 20px 45px !important; background: white; border-radius: 5px; } comment .reply,[data-is="comment"] .reply{ margin: 15px !important; background: #eeeeee; border-radius: 4px !important; padding-top: 0 !important; padding-bottom: 0 !important; width: 90%; } comment .comment-heading,[data-is="comment"] .comment-heading{ width: 100% !important; min-height: 80px; } comment .reply .comment-heading,[data-is="comment"] .reply .comment-heading{ min-height: 65px; } comment .header-text,[data-is="comment"] .header-text{ height: 70px; } comment .reply .header-text,[data-is="comment"] .reply .header-text{ height: 50px; } comment .header-text,[data-is="comment"] .header-text{ display: flex !important; flex-direction: column; justify-content: space-between; text-align: start; } comment .comment-date,[data-is="comment"] .comment-date{ font-size: 1.0em !important; color: #aaaaaa; } comment .comment-text,[data-is="comment"] .comment-text{ text-align: start; font-size: 1.3em; line-height: 1.5em; white-space: pre-line; } comment .row.content,[data-is="comment"] .row.content{ display: flex; justify-content: start !important; } comment .replyform,[data-is="comment"] .replyform{ width: 100%; margin: 15px; } comment .delete-button,[data-is="comment"] .delete-button{ width: 30px; height: 30px; background: #bbbbbb !important; } comment .black.delete.icon,[data-is="comment"] .black.delete.icon{ margin: auto !important; } comment .delete-options,[data-is="comment"] .delete-options{ display: flex !important; justify-content: center; }', '', function(opts) {
-        self = this
+riot.tag2('comment', '<div class="ui row"> <div class="ui grid comment-heading"> <div class="two wide column"> <a class="ui tiny circular image" href="/profiles/{opts.cmt.author.id}/"> <img riot-src="{opts.cmt.author.portrait}"> </a> </div> <div class="eight wide column"> <div class="ui header header-text-container"> <div class="content header-text"> <a href="/profiles/{opts.cmt.author.id}/"> {opts.cmt.author.reference} </a> <div class="sub header comment-date"> {format_datestring(opts.cmt.date_created)} </div> </div> </div> </div> <div class="six wide column"> <div if="{opts.cmt.author.id == TT.user_pk}" class="ui right floated mini button delete-button" id="delete-comment-{opts.cmt.id}"> <i class="black delete icon"></i> </div> </div> </div> </div> <div class="ui divider"></div> <div class="row content"> <div class="ui content comment-text"> {opts.cmt.text} </div> </div> <comment class="ui grid reply" each="{reply in opts.cmt.replies}" cmt="{reply}"></comment> <form if="{!opts.cmt.parent}" class="ui form replyform"> <div class="field"> <textarea id="reply-text-area-{opts.cmt.id}" rows="2" type="text" name="reply" placeholder="Write a reply..."></textarea> </div> </form>', 'comment { min-height: 60px; width: 80%; margin: 30px !important; padding: 20px 45px 20px 45px !important; background: white; border-radius: 5px; } comment .reply,[data-is="comment"] .reply{ margin: 15px !important; background: #eeeeee; border-radius: 4px !important; padding-top: 0 !important; padding-bottom: 0 !important; width: 90%; } comment .comment-heading,[data-is="comment"] .comment-heading{ width: 100% !important; min-height: 80px; } comment .reply .comment-heading,[data-is="comment"] .reply .comment-heading{ min-height: 65px; } comment .header-text,[data-is="comment"] .header-text{ height: 70px; } comment .reply .header-text,[data-is="comment"] .reply .header-text{ height: 50px; } comment .header-text,[data-is="comment"] .header-text{ display: flex !important; flex-direction: column; justify-content: space-between; text-align: start; } comment .comment-date,[data-is="comment"] .comment-date{ font-size: 1.0em !important; color: #aaaaaa; } comment .comment-text,[data-is="comment"] .comment-text{ text-align: start; font-size: 1.3em; line-height: 1.5em; white-space: pre-line; } comment .row.content,[data-is="comment"] .row.content{ display: flex; justify-content: start !important; } comment .replyform,[data-is="comment"] .replyform{ width: 100%; margin: 15px; } comment .delete-button,[data-is="comment"] .delete-button{ width: 30px; height: 30px; background: #bbbbbb !important; } comment .black.delete.icon,[data-is="comment"] .black.delete.icon{ margin: auto !important; } comment .delete-options,[data-is="comment"] .delete-options{ display: flex !important; justify-content: center; }', '', function(opts) {
+        var self = this
 
         function text_area_behavior(el, disabled) {
             el.keydown(function (e) {
@@ -17,16 +17,17 @@ riot.tag2('comment', '<div class="ui row"> <div class="ui grid comment-heading">
                     } else if (e.keyCode === 13 && !e.ctrlKey) {
                         e.preventDefault()
                         let text = $(this).val()
-                        self.post_comment(text, opts.author_id, opts.cmt.article, opts.cmt.id, opts.csrf)
+                        self.post_comment(text, self.opts.cmt.article, self.opts.cmt.id)
                     }
                 }
             })
         }
 
         self.on('mount', function () {
-            let id = '#reply-text-area-' + opts.cmt.id
+            print('self', self)
+            let id = '#reply-text-area-' + self.opts.cmt.id
             let reply_form = $(id)
-            if (opts.author_id == 'None') {
+            if (TT.user_pk == 'None') {
                 text_area_behavior(reply_form, true)
                 reply_form.on('click', function (e){
                     $('#login_menu').click()
@@ -34,7 +35,7 @@ riot.tag2('comment', '<div class="ui row"> <div class="ui grid comment-heading">
             } else {
                 text_area_behavior(reply_form, false)
             }
-            let delete_button = $('#delete-comment-' + opts.cmt.id)
+            let delete_button = $('#delete-comment-' + self.opts.cmt.id)
             delete_button.on('click', function (e) {
                 print(e.target)
                 let pk = opts.cmt.id
@@ -42,13 +43,15 @@ riot.tag2('comment', '<div class="ui row"> <div class="ui grid comment-heading">
             })
         })
 
-        self.post_comment = function (text, author_pk, article_pk, parent_pk, csrf_token) {
+        self.post_comment = function (text, article_pk, parent_pk) {
             let post_data = {
                 "text": text,
                 "parent": parent_pk,
-                "author": author_pk,
+                "author": TT.user_pk,
                 "article": article_pk,
             }
+
+            print(post_data)
 
             $.ajax({
                 type: 'POST',
@@ -56,66 +59,59 @@ riot.tag2('comment', '<div class="ui row"> <div class="ui grid comment-heading">
                 data: JSON.stringify(post_data),
                 contentType: 'application/json',
                 dataType: 'json',
-                headers: {
-                    'X-CSRFToken': csrf_token,
-                },
             })
             .done(function (data) {
-                TT.events.trigger('comment_posted', null)
+                TT.events.trigger('comment_posted', false)
             })
             .fail(function (data) {
                 print('comment post error:', data)
             })
         }
 });
-riot.tag2('comment-section', '<div class="ui container"> <form class="ui form commentform"> <div class="field"> <textarea rows="3" type="text" name="comment" placeholder="Respond with a comment..." ref="comment_textarea"></textarea> </div> </form> <comment class="ui centered grid outer-comment" csrf="{comsec.opts.csrf}" author_id="{comsec.opts.author_id}" each="{comm in comments}" cmt="{comm}"></comment> </div>', 'comment-section { background: #21324d; min-height: 400px; } comment-section .outer-comment,[data-is="comment-section"] .outer-comment{ width: 70% !important; margin-left: auto !important; margin-right: auto !important; } comment-section .commentform,[data-is="comment-section"] .commentform{ width: 70%; margin: 50px auto 50px auto; }', '', function(opts) {
-        comsec = this
+riot.tag2('comment-section', '<div class="ui container"> <form class="ui form commentform"> <div class="field"> <textarea rows="3" type="text" name="comment" placeholder="Respond with a comment..." ref="comment_textarea"></textarea> </div> </form> <comment class="ui centered grid outer-comment" each="{comm in comments}" cmt="{comm}"></comment> </div>', 'comment-section { background: #21324d; min-height: 400px; } comment-section .outer-comment,[data-is="comment-section"] .outer-comment{ width: 70% !important; margin-left: auto !important; margin-right: auto !important; } comment-section .commentform,[data-is="comment-section"] .commentform{ width: 70%; margin: 50px auto 50px auto; }', '', function(opts) {
+        var self = this
 
         function get_comments(scroll) {
             $.ajax({
                 type: 'GET',
-                url: '/api/v1/article_comments/' + opts.article_id + '/',
+                url: '/api/v1/article_comments/' + self.opts.article_id + '/',
                 data: null,
                 contentType: 'application/json',
                 dataType: 'json',
             }).done(function (data) {
-                comsec.comments = data
+                self.comments = data
                 print(data)
-                comsec.update()
+                self.update()
                 if (scroll) {
                     $('html,body').animate({scrollTop: document.body.scrollHeight}, 350);
                 }
             })
         }
 
-        function delete_comment(pk, csrf_token) {
+        function delete_comment(pk) {
             $.ajax({
                 type: 'DELETE',
                 url: '/api/v1/comments/' + pk,
                 data: JSON.stringify(null),
                 contentType: 'application/json',
                 dataType: 'json',
-                headers: {
-                    'X-CSRFToken': csrf_token,
-                },
             })
                 .done(function (data) {
-                    TT.events.trigger('comment_posted', null)
+                    TT.events.trigger('comment_posted', false)
                 })
                 .fail(function (data) {
                     print('comment post error:', data)
                 })
         }
 
-        comsec.post_comment = function (text, author_pk, article_pk) {
+        self.post_comment = function (text, article_pk) {
             let post_data = {
                 text: text,
-                author: comsec.opts.author_id,
-                article: comsec.opts.article_id,
+                author: TT.user_pk,
+                article: self.opts.article_id,
                 parent: null,
             }
             print('post data', post_data)
-            print('csrf', comsec.opts.csrf)
 
             $.ajax({
                 type: 'POST',
@@ -123,12 +119,10 @@ riot.tag2('comment-section', '<div class="ui container"> <form class="ui form co
                 data: JSON.stringify(post_data),
                 contentType: 'application/json',
                 dataType: 'json',
-                headers: {
-                    'X-CSRFToken': comsec.opts.csrf,
-                },
             })
                 .done(function (data) {
-                    TT.events.trigger('comment_posted', null)
+                    print(data)
+                    TT.events.trigger('comment_posted', true)
                 })
                 .fail(function (data) {
                     print('comment post error:', data)
@@ -151,7 +145,7 @@ riot.tag2('comment-section', '<div class="ui container"> <form class="ui form co
                     } else if (e.keyCode === 13 && !e.ctrlKey) {
                         e.preventDefault()
                         let text = $(this).val()
-                        comsec.post_comment(text)
+                        self.post_comment(text)
                         $(this).val(function (i, val) {
                             return ''
                         })
@@ -160,10 +154,10 @@ riot.tag2('comment-section', '<div class="ui container"> <form class="ui form co
                 }
             })
         }
-        comsec.on('mount', function () {
+        self.on('mount', function () {
             print('comment section opts', opts)
-            let comment_input = $(comsec.refs.comment_textarea)
-            if (comsec.opts.author_id == 'None') {
+            let comment_input = $(self.refs.comment_textarea)
+            if (TT.user_pk == 'None') {
                 text_area_behavior(comment_input, true)
                 comment_input.on('click', function (e){
                     $('#login_menu').click()
@@ -174,16 +168,16 @@ riot.tag2('comment-section', '<div class="ui container"> <form class="ui form co
             get_comments(false)
         })
 
-        TT.events.on('comment_posted', function() {
+        TT.events.on('comment_posted', function(scroll) {
             print('comment posted from comment-section')
-            get_comments(true)
+            get_comments(scroll)
         })
 
         TT.events.on('comment_delete', function (pk) {
             $('.ui.basic.modal')
                 .modal({
                     onApprove: function () {
-                        delete_comment(pk, opts.csrf)
+                        delete_comment(pk)
                     }
                 })
                 .modal('show')
