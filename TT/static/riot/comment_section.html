@@ -1,43 +1,14 @@
 <comment-section>
     <div class="ui container">
-        <comment class="ui centered grid outer-comment" each="{ comm in comments }" cmt="{ comm }"></comment>
-        <div class="ui massive blue button" ref="clikky">clikky</div>
+        <comment class="ui centered grid outer-comment" csrf="{ self.opts.csrf }" each="{ comm in comments }" cmt="{ comm }"></comment>
     </div>
     <script>
         self = this
 
-        self.on('mount', function () {
-            self.get_comments()
-            $(self.refs.clikky).on('click', function (data) {
-                let post_data = {
-                    "text": "API Comment",
-                    "parent": 1,
-                    "author": 1,
-                    "article": 1,
-                }
-                $.ajax({
-                    type: 'POST',
-                    url: '/api/v1/comments/',
-                    data: JSON.stringify(post_data),
-                    contentType: 'application/json',
-                    dataType: 'json',
-                    headers: {
-                        'X-CSRFToken': self.opts.csrf,
-                    },
-                })
-                .done(function (data) {
-                    self.get_comments()
-                })
-                .fail(function (data) {
-                    print('comments clikky error:', data)
-                })
-            })
-        })
-
         self.get_comments = function () {
             $.ajax({
                 type: 'GET',
-                url: '/api/v1/article_comments/' + self.opts.article_id + '/',
+                url: '/api/v1/article_comments/' + opts.article_id + '/',
                 data: null,
                 contentType: 'application/json',
                 dataType: 'json',
@@ -47,6 +18,20 @@
                 self.update()
             })
         }
+
+        self.on('mount', function () {
+
+            self.get_comments()
+
+            let get_comments = self.get_comments
+
+            window.addEventListener('update_comments', function (e) {
+                //print(e)
+                get_comments()
+            })
+        })
+
+
     </script>
     <style>
         comment-section {

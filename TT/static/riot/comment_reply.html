@@ -1,4 +1,4 @@
-<comment>
+<comment-reply>
     <div class="ui row">
         <div class="ui grid comment-heading">
             <div class="two wide column">
@@ -26,24 +26,18 @@
             { opts.cmt.text }
         </div>
     </div>
-    <comment-reply class="ui grid reply" each="{ reply in replies }" cmt="{ reply }"></comment-reply>
-    <form if={ !opts.cmt.parent } class="ui form replyform" ref="reply_form">
-        <div class="field">
-            <textarea ref='reply_text_area' data-comment-pk="{ opts.cmt.pk }" data-author-pk="{ opts.cmt.author.id }" rows='2' type="text" name="reply" placeholder="Write a reply..."></textarea>
-        </div>
-    </form>
     <script>
-        self = this
+ //       self = this
 
-        self.on('mount', function () {
-//            self.update_comment()
-
-            print(self.opts)
-            let id = '#reply-text-area-' + opts.cmt.pk
-            let reply_form = $(self.refs.reply_text_area)
-            //print(self.refs.reply_text_area)
-            //print(reply_form)
-
+//        self.on('mount', function () {
+//            print('my opts', my_opts)
+//            if (!my_opts.cmt.parent) {
+//                self.update_comment(opts)
+//            }
+//
+//            let id = '#reply-text-area-' + opts.cmt.pk
+//            let reply_form = $(id)
+//
 //            reply_form.keydown(function (e) {
 //                if ((e.keyCode == 10 || e.keyCode == 13) && e.ctrlKey) {
 //                    $(this).val(function (i, val) {
@@ -63,52 +57,52 @@
 //                    // unfocus
 //                }
 //            })
-        })
+//        })
 
 
-        self.post_comment = function (text, author_pk, article_pk, parent_pk, csrf_token) {
-            let post_data = {
-                "text": text,
-                "parent": parent_pk,
-                "author": author_pk,
-                "article": article_pk,
-            }
-
-            $.ajax({
-                type: 'POST',
-                url: '/api/v1/comments/',
-                data: JSON.stringify(post_data),
-                contentType: 'application/json',
-                dataType: 'json',
-                headers: {
-                    'X-CSRFToken': csrf_token,
-                },
-            })
-            .done(function (data) {
-//                self.update_comment(parent_pk)
-                print(data)
-                window.dispatchEvent(new CustomEvent('update_comments', {bubbles: true,}))
-            })
-            .fail(function (data) {
-                print('comment post error:', data)
-            })
-        }
-
-        self.update_comment = function (opts) {
-//            print('update comment', opts)
-            $.ajax({
-                type: 'GET',
-                url: '/api/v1/comments/' + self.opts.cmt.pk,
-                data: null,
-                contentType: 'application/json',
-                dataType: 'json',
-            }).done(function (data) {
-//                print(opts)
-//                print('reply data', opts.cmt.pk, data)
-                self.replies = data.replies
-                self.update()
-            })
-        }
+//        self.post_comment = function (text, author_pk, article_pk, parent_pk, csrf_token) {
+//            let post_data = {
+//                "text": text,
+//                "parent": parent_pk,
+//                "author": author_pk,
+//                "article": article_pk,
+//            }
+//
+//            $.ajax({
+//                type: 'POST',
+//                url: '/api/v1/comments/',
+//                data: JSON.stringify(post_data),
+//                contentType: 'application/json',
+//                dataType: 'json',
+//                headers: {
+//                    'X-CSRFToken': csrf_token,
+//                },
+//            })
+//            .done(function (data) {
+////                self.update_comment(parent_pk)
+//                print(data)
+//                window.dispatchEvent(new CustomEvent('update_comments', {bubbles: true,}))
+//            })
+//            .fail(function (data) {
+//                print('comment post error:', data)
+//            })
+//        }
+//
+//        self.update_comment = function (opts) {
+////            print('update comment', opts)
+//            $.ajax({
+//                type: 'GET',
+//                url: '/api/v1/comments/' + opts.cmt.pk,
+//                data: null,
+//                contentType: 'application/json',
+//                dataType: 'json',
+//            }).done(function (data) {
+////                print(opts)
+////                print('reply data', opts.cmt.pk, data)
+//                opts.replies = data.replies
+//                self.update()
+//            })
+//        }
 
     </script>
     <style>
@@ -174,4 +168,4 @@
         }
     </style>
 
-</comment>
+</comment-reply>

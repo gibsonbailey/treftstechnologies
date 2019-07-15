@@ -123,6 +123,9 @@
         {% endblock extra_js %}
         <script>
 
+            var TT = {}
+            TT.events = riot.observable()
+
             print = function() {
                 var args = Array.prototype.slice.call(arguments);
                 console.log.apply(console, args);
