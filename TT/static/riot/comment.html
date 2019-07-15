@@ -13,9 +13,14 @@
                             { opts.cmt.author.reference }
                         </a>
                         <div class="sub header comment-date">
-                            { opts.cmt.date_created }
+                            { format_datestring(opts.cmt.date_created) }
                         </div>
                     </div>
+                </div>
+            </div>
+            <div class="six wide column">
+                <div if={ opts.cmt.author.id == opts.author_id } class="ui right floated mini button delete-button" data-pk="{ opts.cmt.id }" id="delete-comment-{ opts.cmt.id }">
+                    <i class="black delete icon"></i>
                 </div>
             </div>
         </div>
@@ -26,45 +31,58 @@
             { opts.cmt.text }
         </div>
     </div>
-    <comment-reply class="ui grid reply" each="{ reply in replies }" cmt="{ reply }"></comment-reply>
-    <form if={ !opts.cmt.parent } class="ui form replyform" ref="reply_form">
+    <comment class="ui grid reply" each="{ reply in opts.cmt.replies }" csrf="{ self.opts.csrf }" author_id="{ self.opts.author_id }"cmt="{ reply }"></comment>
+    <form if={ !opts.cmt.parent } class="ui form replyform">
         <div class="field">
-            <textarea ref='reply_text_area' data-comment-pk="{ opts.cmt.pk }" data-author-pk="{ opts.cmt.author.id }" rows='2' type="text" name="reply" placeholder="Write a reply..."></textarea>
+            <textarea id='reply-text-area-{ opts.cmt.pk }' rows='2' type="text" name="reply" placeholder="Write a reply..."></textarea>
         </div>
     </form>
     <script>
         self = this
 
+        function delete_comment(pk, csrf_token) {
+            $.ajax({
+                type: 'DELETE',
+                url: '/api/v1/comments/' + pk,
+                data: JSON.stringify(null),
+                contentType: 'application/json',
+                dataType: 'json',
+                headers: {
+                    'X-CSRFToken': csrf_token,
+                },
+            })
+                .done(function (data) {
+                    TT.events.trigger('comment_posted', null)
+                })
+                .fail(function (data) {
+                    print('comment post error:', data)
+                })
+        }
+
         self.on('mount', function () {
-//            self.update_comment()
-
-            print(self.opts)
             let id = '#reply-text-area-' + opts.cmt.pk
-            let reply_form = $(self.refs.reply_text_area)
-            //print(self.refs.reply_text_area)
-            //print(reply_form)
+            let reply_form = $(id)
 
-//            reply_form.keydown(function (e) {
-//                if ((e.keyCode == 10 || e.keyCode == 13) && e.ctrlKey) {
-//                    $(this).val(function (i, val) {
-//                        let pos = e.target.selectionStart
-//                        let spliced_string = val.slice(0, pos) + '\n' + val.slice(pos)
-//                        return spliced_string
-//                    })
-//                } else if (e.keyCode === 13 && !e.ctrlKey) {
-//                    e.preventDefault()
-//                    print('submit')
-//                    let text = $(this).val()
-//                    print('author', opts.cmt.author.id)
-//                    print('article', opts.cmt.article)
-//                    print('comment', opts.cmt.pk)
-//                    self.post_comment(text, opts.cmt.author.id, opts.cmt.article, opts.cmt.pk, opts.csrf)
-//                    //self.update_comment(opts)
-//                    // unfocus
-//                }
-//            })
+            reply_form.keydown(function (e) {
+                if ((e.keyCode == 10 || e.keyCode == 13) && e.ctrlKey) {
+                    $(this).val(function (i, val) {
+                        let pos = e.target.selectionStart
+                        let spliced_string = val.slice(0, pos) + '\n' + val.slice(pos)
+                        return spliced_string
+                    })
+                } else if (e.keyCode === 13 && !e.ctrlKey) {
+                    e.preventDefault()
+                    let text = $(this).val()
+                    self.post_comment(text, opts.author_id, opts.cmt.article, opts.cmt.pk, opts.csrf)
+                }
+            })
+            let delete_button = $('#delete-comment-' + opts.cmt.id)
+            delete_button.on('click', function (e) {
+                print(e.target)
+                let pk = opts.cmt.id
+                delete_comment(pk, opts.csrf)
+            })
         })
-
 
         self.post_comment = function (text, author_pk, article_pk, parent_pk, csrf_token) {
             let post_data = {
@@ -85,31 +103,12 @@
                 },
             })
             .done(function (data) {
-//                self.update_comment(parent_pk)
-                print(data)
-                window.dispatchEvent(new CustomEvent('update_comments', {bubbles: true,}))
+                TT.events.trigger('comment_posted', null)
             })
             .fail(function (data) {
                 print('comment post error:', data)
             })
         }
-
-        self.update_comment = function (opts) {
-//            print('update comment', opts)
-            $.ajax({
-                type: 'GET',
-                url: '/api/v1/comments/' + self.opts.cmt.pk,
-                data: null,
-                contentType: 'application/json',
-                dataType: 'json',
-            }).done(function (data) {
-//                print(opts)
-//                print('reply data', opts.cmt.pk, data)
-                self.replies = data.replies
-                self.update()
-            })
-        }
-
     </script>
     <style>
         comment {
@@ -127,6 +126,7 @@
             border-radius: 4px !important;
             padding-top: 0 !important;
             padding-bottom: 0 !important;
+            width: 90%;
         }
 
 
@@ -160,7 +160,10 @@
         }
 
         .comment-text {
+            text-align: start;
             font-size: 1.3em;
+            line-height: 1.5em;
+            white-space: pre-line;
         }
 
         .row.content {
@@ -171,6 +174,16 @@
         .replyform {
             width: 100%;
             margin: 15px;
+        }
+
+        .delete-button {
+            width: 30px;
+            height: 30px;
+            background: #bbbbbb !important;
+        }
+
+        .black.delete.icon {
+            margin: auto !important;
         }
     </style>
 

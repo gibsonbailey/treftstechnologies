@@ -1,11 +1,16 @@
 <comment-section>
     <div class="ui container">
-        <comment class="ui centered grid outer-comment" csrf="{ self.opts.csrf }" each="{ comm in comments }" cmt="{ comm }"></comment>
+        <form class="ui form commentform">
+            <div class="field">
+                <textarea rows='3' type="text" name="comment" placeholder="Respond with a comment..." ref="comment_textarea"></textarea>
+            </div>
+        </form>
+        <comment class="ui centered grid outer-comment" csrf="{ comsec.opts.csrf }" author_id="{ comsec.opts.author_id }" each="{ comm in comments }" cmt="{ comm }"></comment>
     </div>
     <script>
-        self = this
+        comsec = this
 
-        self.get_comments = function () {
+        function get_comments(scroll) {
             $.ajax({
                 type: 'GET',
                 url: '/api/v1/article_comments/' + opts.article_id + '/',
@@ -13,35 +18,88 @@
                 contentType: 'application/json',
                 dataType: 'json',
             }).done(function (data) {
-                print(data)
-                self.comments = data
-                self.update()
+                comsec.comments = data
+                comsec.update()
+                if (scroll) {
+                    $('html,body').animate({scrollTop: document.body.scrollHeight}, 350);
+                }
             })
         }
 
-        self.on('mount', function () {
+        comsec.post_comment = function (text, author_pk, article_pk) {
+            let post_data = {
+                text: text,
+                author: comsec.opts.author_id,
+                article: comsec.opts.article_id,
+                parent: null,
+            }
+            print('post data', post_data)
+            print('csrf', comsec.opts.csrf)
 
-            self.get_comments()
-
-            let get_comments = self.get_comments
-
-            window.addEventListener('update_comments', function (e) {
-                //print(e)
-                get_comments()
+            $.ajax({
+                type: 'POST',
+                url: '/api/v1/comments/',
+                data: JSON.stringify(post_data),
+                contentType: 'application/json',
+                dataType: 'json',
+                headers: {
+                    'X-CSRFToken': comsec.opts.csrf,
+                },
             })
+                .done(function (data) {
+                    TT.events.trigger('comment_posted', null)
+                })
+                .fail(function (data) {
+                    print('comment post error:', data)
+                })
+        }
+
+        function text_area_behavior(el) {
+            el.keydown(function (e) {
+                if ((e.keyCode == 10 || e.keyCode == 13) && e.ctrlKey) {
+                    $(this).val(function (i, val) {
+                        let pos = e.target.selectionStart
+                        let spliced_string = val.slice(0, pos) + '\n' + val.slice(pos)
+                        return spliced_string
+                    })
+                } else if (e.keyCode === 13 && !e.ctrlKey) {
+                    e.preventDefault()
+                    let text = $(this).val()
+                    comsec.post_comment(text)
+                    $(this).val(function (i, val) {
+                        return ''
+                    })
+                    $(this).blur()
+                }
+            })
+        }
+        comsec.on('mount', function () {
+            print('comment section opts', opts)
+            let comment_input = $(comsec.refs.comment_textarea)
+            text_area_behavior(comment_input, comsec.opts.author_id, comsec.opts.article_id)
+            get_comments(false)
         })
 
-
+        TT.events.on('comment_posted', function() {
+            print('comment posted from comment-section')
+            get_comments(true)
+        })
     </script>
     <style>
         comment-section {
             background: #21324d;
+            min-height: 700px;
         }
 
         .outer-comment {
             width: 70% !important;
             margin-left: auto !important;
             margin-right: auto !important;
+        }
+
+        .commentform {
+            width: 90%;
+            margin-top: 50px;
         }
     </style>
 </comment-section>

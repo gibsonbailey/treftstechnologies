@@ -21,3 +21,15 @@ class CommentViewSet(ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     permission_classes = (AllowAny,)
+
+    def destroy(self, request, *args, **kwargs):
+        comment = self.get_object()
+        print(comment)
+        print(comment.author)
+        print(request.user)
+        if request.user == comment.author:
+            comment.delete()
+            return Response(data='delete success')
+        else:
+            return Response(status=403)
+

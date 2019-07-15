@@ -133,6 +133,12 @@
 
             riot.mount('*')
 
+            function format_datestring(datestring) {
+                let date = new Date(datestring)
+                let options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }
+                return date.toLocaleDateString('en-US', options)
+            }
+
             function getFormData($form){
                 let unindexed_array = $form.serializeArray();
                 let indexed_array = {};
@@ -391,12 +397,12 @@
                 right: 0;
                 background: black;
                 color: white;
-                min-height: 100px;
+                height: 100px;
             }
 
             .footer-spacer {
                 background: none;
-                height: 300px;
+                height: 100px;
             }
 
             footer .container {
