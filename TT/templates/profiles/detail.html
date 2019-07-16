@@ -84,15 +84,20 @@
             position: relative;
         }
 
+        #image-container:hover #edit-image-button {
+            background: rgba(0, 0, 0, 0.8);
+        }
+
         #edit-image-button {
             position: absolute;
             width: 200%;
             height: 200%;
             bottom: -140%;
-            background: #aaaaaa;
+            background: rgba(0, 0, 0, 0.2);
             transform: rotate(-30deg);
             display: flex;
             justify-content: center;
+            transition: 0.3s;
         }
 
         #edit-image-icon {
