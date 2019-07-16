@@ -160,8 +160,14 @@
             });
 
             var TT = {}
+            TT.user = {}
             TT.events = riot.observable()
-            TT.user_pk = '{{ request.user.pk }}'
+
+            TT.user.pk = '{{ request.user.pk }}'
+            TT.user.is_superuser = '{{ request.user.is_superuser }}' === 'True'
+
+
+
 
             riot.mount('*')
 
@@ -328,7 +334,6 @@
                 let login_form = $('#login_form')
                 let data = getFormData(login_form)
                 let csrf = data.csrfmiddlewaretoken
-                print(csrf)
             })
         </script>
         <style>

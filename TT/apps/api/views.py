@@ -24,7 +24,6 @@ class IsUserOrReadOnly(permissions.BasePermission):
         return user == request.user
 
 
-
 class CommentList(APIView):
     def get(self, request, **kwargs):
         article_pk = self.kwargs.get('pk')
@@ -44,7 +43,7 @@ class CommentViewSet(ModelViewSet):
         print(comment)
         print(comment.author)
         print(request.user)
-        if request.user == comment.author:
+        if request.user == comment.author or request.user.is_superuser:
             comment.delete()
             return Response(data='delete success')
         else:

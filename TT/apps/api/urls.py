@@ -6,7 +6,7 @@ from . import views
 
 router = SimpleRouter()
 router.register('comments', views.CommentViewSet)
-router.register('users', views.UserViewSet)
+router.register('users', views.UserViewSet, 'users')
 
 print('router', router.urls)
 

@@ -3,15 +3,29 @@
 {% load static %}
 
 {% block content %}
+    <div class="ui mini modal" id="image-upload-modal">
+        <div class="ui header">
+            Select a new profile portrait.
+        </div>
+        <form class="ui form" id="image-upload-form" action="{% url 'api:users-detail' pk=request.user.pk%}" enctype="multipart/form-data" method="patch">
+            <input id="image-upload-input" name="portrait" type="file">
+            <button class="ui blue button" id="choose-image-button">Select New Profile Picture</button>
+            <button class="ui ok blue button hidden" id="submit-image-button" type="submit">Submit</button>
+            <button class="ui basic red cancel button" id="cancel-modal-button">Cancel</button>
+        </form>
+    </div>
     <div class="ui container">
         <div class="ui centered two column grid heading">
             <div class="four wide column">
-                <div class="ui centered medium circular image">
+                <div class="ui centered medium circular image" id="image-container">
                     {% if object.portrait %}
                         <img id="heading-image" src="{{ object.portrait.url }}">
                     {% else %}
                         <img id="heading-image" src="{% static "placeholders/square-image.png" %}">
                     {% endif %}
+                    <div id="edit-image-button">
+                        <i id="edit-image-icon" class="ui huge inverted plus icon"></i>
+                    </div>
                 </div>
             </div>
             <div class="eight wide column">
@@ -25,13 +39,30 @@
                 <div class="ui content">
                     <p class="description">
                         {% if object.bio %}
-                            {{ object.bio }}
+                            <p class="not-editing" id="bio-description">{{ object.bio }}</p>
                         {% else %}
-                            No bio has been submitted.
+                            <p class="not-editing" id="bio-description">No bio has been submitted.</p>
                         {% endif %}
-                    <div class="ui large label">
+                        <form class="ui form hidden editing" id="bio-form">
+                            <div class="field">
+                                {% if object.bio %}
+                                    <textarea id="bio-input" class="ui input" name="bio">{{ object.bio }}</textarea>
+                                {% else %}
+                                    <textarea id="bio-input" class="ui input" name="bio" placeholder="Describe yourself"></textarea>
+                                {% endif %}
+                            </div>
+                        </form>
+                    <div class="ui large label not-editing" id="edit-bio-button">
                         <i class="edit outline icon"></i>
                         Edit
+                    </div>
+                    <div class="ui large basic blue label editing hidden" id="submit-edit-bio-button">
+                        <i class="check icon"></i>
+                        Submit
+                    </div>
+                    <div class="ui large basic red label editing hidden" id="cancel-edit-bio-button">
+                        <i class="undo alternate icon"></i>
+                        Cancel
                     </div>
                     </p>
                 </div>
@@ -45,24 +76,112 @@
             font-size: 1.5em;
         }
 
+        .hidden {
+            display: none !important;
+        }
+
+        #image-container {
+            position: relative;
+        }
+
+        #edit-image-button {
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            bottom: -140%;
+            background: #aaaaaa;
+            transform: rotate(-30deg);
+            display: flex;
+            justify-content: center;
+        }
+
+        #edit-image-icon {
+            margin-top: 20px;
+            transform: rotate(30deg);
+        }
+
+        #image-upload-input {
+            width: 0px;
+            height: 0px;
+            padding: 0px;
+            margin: 0px;
+        }
     </style>
     <script>
 
     $(document).ready( function () {
-        $.ajax({
-            url: '/api/v1/users/' + 1 + '/',
-            data: JSON.stringify({first_name: 'baylee'}),
-            method: 'PATCH',
-            headers: {
-                'X-CSRFToken': '{{ csrf_token }}',
-            }
+        $('#edit-bio-button').on('click', function (e) {
+            $('.editing').removeClass('hidden')
+            $('.not-editing').addClass('hidden')
         })
-            .done( function (data) {
-                console.log(data)
+
+        $('#cancel-edit-bio-button').on('click', function (e) {
+            $('.editing').addClass('hidden')
+            $('.not-editing').removeClass('hidden')
+        })
+
+        $('#submit-edit-bio-button').on('click', function (e) {
+            let text = $('#bio-input').val()
+            update_bio(text)
+        })
+
+        $('#edit-image-button').on('click', function (e) {
+            $('#submit-image-button').addClass('hidden')
+            $('#choose-image-button').removeClass('hidden')
+
+            $('#image-upload-modal').modal('show')
+        })
+
+        $('#image-upload-form').on('submit', function (e) {
+            e.preventDefault()
+        })
+
+        $('#submit-image-button').on('click', function (e) {
+            $('#image-upload-form').ajaxSubmit({
+                method: 'PATCH',
+                cache: false,
+                success: function (data) {
+                    window.location.reload()
+                },
+                error: function (data) {
+                },
             })
-            .fail( function (data) {
-                console.log(data)
+        })
+
+        $('#choose-image-button').on('click', function (e) {
+            $('#image-upload-input').click()
+        })
+
+        $('#cancel-modal-button').on('click', function (e) {
+            $('#image-upload-modal').modal('hide')
+        })
+
+        $('#image-upload-input').on('change', function (e) {
+            $('#submit-image-button').removeClass('hidden')
+        })
+
+        $('#choose-image-button').on('click', function (e) {
+            $(this).addClass('hidden')
+        })
+
+        function update_bio(text) {
+            $.ajax({
+                url: '/api/v1/users/' + TT.user.pk + '/',
+                data: JSON.stringify({
+                    bio: text,
+                }),
+                method: 'PATCH',
+                contentType: 'application/json',
+                dataType: 'json',
             })
+                .done( function (data) {
+                    console.log(data)
+                    window.location.reload()
+                })
+                .fail( function (data) {
+                    console.log(data)
+                })
+        }
     })
     </script>
 {% endblock content %}

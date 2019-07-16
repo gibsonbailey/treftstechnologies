@@ -47,7 +47,7 @@
         self.post_comment = function (text, article_pk) {
             let post_data = {
                 text: text,
-                author: TT.user_pk,
+                author: TT.user.pk,
                 article: self.opts.article_id,
                 parent: null,
             }
@@ -97,7 +97,7 @@
         self.on('mount', function () {
             print('comment section opts', opts)
             let comment_input = $(self.refs.comment_textarea)
-            if (TT.user_pk == 'None') {
+            if (TT.user.pk == 'None') {
                 text_area_behavior(comment_input, true)
                 comment_input.on('click', function (e){
                     $('#login_menu').click()

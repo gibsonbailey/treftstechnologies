@@ -19,7 +19,7 @@
                 </div>
             </div>
             <div class="six wide column">
-                <div if={ opts.cmt.author.id == TT.user_pk } class="ui right floated mini button delete-button" id="delete-comment-{ opts.cmt.id }">
+                <div if={ opts.cmt.author.id == TT.user.pk || TT.user.is_superuser} class="ui right floated mini icon button delete-button" id="delete-comment-{ opts.cmt.id }">
                     <i class="black delete icon"></i>
                 </div>
             </div>
@@ -66,7 +66,7 @@
             print('self', self)
             let id = '#reply-text-area-' + self.opts.cmt.id
             let reply_form = $(id)
-            if (TT.user_pk == 'None') {
+            if (TT.user.pk == 'None') {
                 text_area_behavior(reply_form, true)
                 reply_form.on('click', function (e){
                     $('#login_menu').click()
@@ -86,7 +86,7 @@
             let post_data = {
                 "text": text,
                 "parent": parent_pk,
-                "author": TT.user_pk,
+                "author": TT.user.pk,
                 "article": article_pk,
             }
 

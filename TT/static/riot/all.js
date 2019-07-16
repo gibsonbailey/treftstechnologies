@@ -1,4 +1,4 @@
-riot.tag2('comment', '<div class="ui row"> <div class="ui grid comment-heading"> <div class="two wide column"> <a class="ui tiny circular image" href="/profiles/{opts.cmt.author.id}/"> <img riot-src="{opts.cmt.author.portrait}"> </a> </div> <div class="eight wide column"> <div class="ui header header-text-container"> <div class="content header-text"> <a href="/profiles/{opts.cmt.author.id}/"> {opts.cmt.author.reference} </a> <div class="sub header comment-date"> {format_datestring(opts.cmt.date_created)} </div> </div> </div> </div> <div class="six wide column"> <div if="{opts.cmt.author.id == TT.user_pk}" class="ui right floated mini button delete-button" id="delete-comment-{opts.cmt.id}"> <i class="black delete icon"></i> </div> </div> </div> </div> <div class="ui divider"></div> <div class="row content"> <div class="ui content comment-text"> {opts.cmt.text} </div> </div> <comment class="ui grid reply" each="{reply in opts.cmt.replies}" cmt="{reply}"></comment> <form if="{!opts.cmt.parent}" class="ui form replyform"> <div class="field"> <textarea id="reply-text-area-{opts.cmt.id}" rows="2" type="text" name="reply" placeholder="Write a reply..."></textarea> </div> </form>', 'comment { min-height: 60px; width: 80%; margin: 30px !important; padding: 20px 45px 20px 45px !important; background: white; border-radius: 5px; } comment .reply,[data-is="comment"] .reply{ margin: 15px !important; background: #eeeeee; border-radius: 4px !important; padding-top: 0 !important; padding-bottom: 0 !important; width: 90%; } comment .comment-heading,[data-is="comment"] .comment-heading{ width: 100% !important; min-height: 80px; } comment .reply .comment-heading,[data-is="comment"] .reply .comment-heading{ min-height: 65px; } comment .header-text,[data-is="comment"] .header-text{ height: 70px; } comment .reply .header-text,[data-is="comment"] .reply .header-text{ height: 50px; } comment .header-text,[data-is="comment"] .header-text{ display: flex !important; flex-direction: column; justify-content: space-between; text-align: start; } comment .comment-date,[data-is="comment"] .comment-date{ font-size: 1.0em !important; color: #aaaaaa; } comment .comment-text,[data-is="comment"] .comment-text{ text-align: start; font-size: 1.3em; line-height: 1.5em; white-space: pre-line; } comment .row.content,[data-is="comment"] .row.content{ display: flex; justify-content: start !important; } comment .replyform,[data-is="comment"] .replyform{ width: 100%; margin: 15px; } comment .delete-button,[data-is="comment"] .delete-button{ width: 30px; height: 30px; background: #bbbbbb !important; } comment .black.delete.icon,[data-is="comment"] .black.delete.icon{ margin: auto !important; } comment .delete-options,[data-is="comment"] .delete-options{ display: flex !important; justify-content: center; }', '', function(opts) {
+riot.tag2('comment', '<div class="ui row"> <div class="ui grid comment-heading"> <div class="two wide column"> <a class="ui tiny circular image" href="/profiles/{opts.cmt.author.id}/"> <img riot-src="{opts.cmt.author.portrait}"> </a> </div> <div class="eight wide column"> <div class="ui header header-text-container"> <div class="content header-text"> <a href="/profiles/{opts.cmt.author.id}/"> {opts.cmt.author.reference} </a> <div class="sub header comment-date"> {format_datestring(opts.cmt.date_created)} </div> </div> </div> </div> <div class="six wide column"> <div if="{opts.cmt.author.id == TT.user.pk || TT.user.is_superuser}" class="ui right floated mini icon button delete-button" id="delete-comment-{opts.cmt.id}"> <i class="black delete icon"></i> </div> </div> </div> </div> <div class="ui divider"></div> <div class="row content"> <div class="ui content comment-text"> {opts.cmt.text} </div> </div> <comment class="ui grid reply" each="{reply in opts.cmt.replies}" cmt="{reply}"></comment> <form if="{!opts.cmt.parent}" class="ui form replyform"> <div class="field"> <textarea id="reply-text-area-{opts.cmt.id}" rows="2" type="text" name="reply" placeholder="Write a reply..."></textarea> </div> </form>', 'comment { min-height: 60px; width: 80%; margin: 30px !important; padding: 20px 45px 20px 45px !important; background: white; border-radius: 5px; } comment .reply,[data-is="comment"] .reply{ margin: 15px !important; background: #eeeeee; border-radius: 4px !important; padding-top: 0 !important; padding-bottom: 0 !important; width: 90%; } comment .comment-heading,[data-is="comment"] .comment-heading{ width: 100% !important; min-height: 80px; } comment .reply .comment-heading,[data-is="comment"] .reply .comment-heading{ min-height: 65px; } comment .header-text,[data-is="comment"] .header-text{ height: 70px; } comment .reply .header-text,[data-is="comment"] .reply .header-text{ height: 50px; } comment .header-text,[data-is="comment"] .header-text{ display: flex !important; flex-direction: column; justify-content: space-between; text-align: start; } comment .comment-date,[data-is="comment"] .comment-date{ font-size: 1.0em !important; color: #aaaaaa; } comment .comment-text,[data-is="comment"] .comment-text{ text-align: start; font-size: 1.3em; line-height: 1.5em; white-space: pre-line; } comment .row.content,[data-is="comment"] .row.content{ display: flex; justify-content: start !important; } comment .replyform,[data-is="comment"] .replyform{ width: 100%; margin: 15px; } comment .delete-button,[data-is="comment"] .delete-button{ width: 30px; height: 30px; background: #bbbbbb !important; } comment .black.delete.icon,[data-is="comment"] .black.delete.icon{ margin: auto !important; } comment .delete-options,[data-is="comment"] .delete-options{ display: flex !important; justify-content: center; }', '', function(opts) {
         var self = this
 
         function text_area_behavior(el, disabled) {
@@ -27,7 +27,7 @@ riot.tag2('comment', '<div class="ui row"> <div class="ui grid comment-heading">
             print('self', self)
             let id = '#reply-text-area-' + self.opts.cmt.id
             let reply_form = $(id)
-            if (TT.user_pk == 'None') {
+            if (TT.user.pk == 'None') {
                 text_area_behavior(reply_form, true)
                 reply_form.on('click', function (e){
                     $('#login_menu').click()
@@ -47,7 +47,7 @@ riot.tag2('comment', '<div class="ui row"> <div class="ui grid comment-heading">
             let post_data = {
                 "text": text,
                 "parent": parent_pk,
-                "author": TT.user_pk,
+                "author": TT.user.pk,
                 "article": article_pk,
             }
 
@@ -107,7 +107,7 @@ riot.tag2('comment-section', '<div class="ui container"> <form class="ui form co
         self.post_comment = function (text, article_pk) {
             let post_data = {
                 text: text,
-                author: TT.user_pk,
+                author: TT.user.pk,
                 article: self.opts.article_id,
                 parent: null,
             }
@@ -157,7 +157,7 @@ riot.tag2('comment-section', '<div class="ui container"> <form class="ui form co
         self.on('mount', function () {
             print('comment section opts', opts)
             let comment_input = $(self.refs.comment_textarea)
-            if (TT.user_pk == 'None') {
+            if (TT.user.pk == 'None') {
                 text_area_behavior(comment_input, true)
                 comment_input.on('click', function (e){
                     $('#login_menu').click()
