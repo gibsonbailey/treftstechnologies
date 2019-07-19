@@ -19,7 +19,6 @@
                 dataType: 'json',
             }).done(function (data) {
                 self.comments = data
-                print(data)
                 self.update()
                 if (scroll) {
                     $('html,body').animate({scrollTop: document.body.scrollHeight}, 350);
@@ -51,8 +50,6 @@
                 article: self.opts.article_id,
                 parent: null,
             }
-            print('post data', post_data)
-
             $.ajax({
                 type: 'POST',
                 url: '/api/v1/comments/',
@@ -61,7 +58,6 @@
                 dataType: 'json',
             })
                 .done(function (data) {
-                    print(data)
                     TT.events.trigger('comment_posted', true)
                 })
                 .fail(function (data) {
@@ -95,7 +91,6 @@
             })
         }
         self.on('mount', function () {
-            print('comment section opts', opts)
             let comment_input = $(self.refs.comment_textarea)
             if (TT.user.pk == 'None') {
                 text_area_behavior(comment_input, true)
@@ -109,7 +104,6 @@
         })
 
         TT.events.on('comment_posted', function(scroll) {
-            print('comment posted from comment-section')
             get_comments(scroll)
         })
 
@@ -125,8 +119,8 @@
     </script>
     <style>
         comment-section {
-            background: #21324d;
             min-height: 400px;
+            background: var(--TT-blue);
         }
 
         .outer-comment {

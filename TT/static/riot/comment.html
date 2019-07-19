@@ -63,7 +63,6 @@
         }
 
         self.on('mount', function () {
-            print('self', self)
             let id = '#reply-text-area-' + self.opts.cmt.id
             let reply_form = $(id)
             if (TT.user.pk == 'None') {
@@ -76,7 +75,6 @@
             }
             let delete_button = $('#delete-comment-' + self.opts.cmt.id)
             delete_button.on('click', function (e) {
-                print(e.target)
                 let pk = opts.cmt.id
                 TT.events.trigger('comment_delete', pk)
             })
@@ -89,9 +87,6 @@
                 "author": TT.user.pk,
                 "article": article_pk,
             }
-
-            print(post_data)
-
             $.ajax({
                 type: 'POST',
                 url: '/api/v1/comments/',

@@ -24,7 +24,6 @@ riot.tag2('comment', '<div class="ui row"> <div class="ui grid comment-heading">
         }
 
         self.on('mount', function () {
-            print('self', self)
             let id = '#reply-text-area-' + self.opts.cmt.id
             let reply_form = $(id)
             if (TT.user.pk == 'None') {
@@ -37,7 +36,6 @@ riot.tag2('comment', '<div class="ui row"> <div class="ui grid comment-heading">
             }
             let delete_button = $('#delete-comment-' + self.opts.cmt.id)
             delete_button.on('click', function (e) {
-                print(e.target)
                 let pk = opts.cmt.id
                 TT.events.trigger('comment_delete', pk)
             })
@@ -50,9 +48,6 @@ riot.tag2('comment', '<div class="ui row"> <div class="ui grid comment-heading">
                 "author": TT.user.pk,
                 "article": article_pk,
             }
-
-            print(post_data)
-
             $.ajax({
                 type: 'POST',
                 url: '/api/v1/comments/',
@@ -68,7 +63,7 @@ riot.tag2('comment', '<div class="ui row"> <div class="ui grid comment-heading">
             })
         }
 });
-riot.tag2('comment-section', '<div class="ui container"> <form class="ui form commentform"> <div class="field"> <textarea rows="3" type="text" name="comment" placeholder="Respond with a comment..." ref="comment_textarea"></textarea> </div> </form> <comment class="ui centered grid outer-comment" each="{comm in comments}" cmt="{comm}"></comment> </div>', 'comment-section { background: #21324d; min-height: 400px; } comment-section .outer-comment,[data-is="comment-section"] .outer-comment{ width: 70% !important; margin-left: auto !important; margin-right: auto !important; } comment-section .commentform,[data-is="comment-section"] .commentform{ width: 70%; margin: 50px auto 50px auto; }', '', function(opts) {
+riot.tag2('comment-section', '<div class="ui container"> <form class="ui form commentform"> <div class="field"> <textarea rows="3" type="text" name="comment" placeholder="Respond with a comment..." ref="comment_textarea"></textarea> </div> </form> <comment class="ui centered grid outer-comment" each="{comm in comments}" cmt="{comm}"></comment> </div>', 'comment-section { min-height: 400px; background: var(--TT-blue); } comment-section .outer-comment,[data-is="comment-section"] .outer-comment{ width: 70% !important; margin-left: auto !important; margin-right: auto !important; } comment-section .commentform,[data-is="comment-section"] .commentform{ width: 70%; margin: 50px auto 50px auto; }', '', function(opts) {
         var self = this
 
         function get_comments(scroll) {
@@ -80,7 +75,6 @@ riot.tag2('comment-section', '<div class="ui container"> <form class="ui form co
                 dataType: 'json',
             }).done(function (data) {
                 self.comments = data
-                print(data)
                 self.update()
                 if (scroll) {
                     $('html,body').animate({scrollTop: document.body.scrollHeight}, 350);
@@ -111,8 +105,6 @@ riot.tag2('comment-section', '<div class="ui container"> <form class="ui form co
                 article: self.opts.article_id,
                 parent: null,
             }
-            print('post data', post_data)
-
             $.ajax({
                 type: 'POST',
                 url: '/api/v1/comments/',
@@ -121,7 +113,6 @@ riot.tag2('comment-section', '<div class="ui container"> <form class="ui form co
                 dataType: 'json',
             })
                 .done(function (data) {
-                    print(data)
                     TT.events.trigger('comment_posted', true)
                 })
                 .fail(function (data) {
@@ -155,7 +146,6 @@ riot.tag2('comment-section', '<div class="ui container"> <form class="ui form co
             })
         }
         self.on('mount', function () {
-            print('comment section opts', opts)
             let comment_input = $(self.refs.comment_textarea)
             if (TT.user.pk == 'None') {
                 text_area_behavior(comment_input, true)
@@ -169,7 +159,6 @@ riot.tag2('comment-section', '<div class="ui container"> <form class="ui form co
         })
 
         TT.events.on('comment_posted', function(scroll) {
-            print('comment posted from comment-section')
             get_comments(scroll)
         })
 

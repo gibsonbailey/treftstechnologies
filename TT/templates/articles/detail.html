@@ -2,13 +2,18 @@
 
 {% load static %}
 
+{% block extra_head %}
+    <script type="text/javascript" src="{% static "js/utility/TTPlot.js" %}"></script>
+    <script src="{% static "js/utility/perlin.js" %}"></script>
+{% endblock extra_head %}
+
 {% block content %}
     <div class="ui container">
     {% if not object.published %}
-        <h1 style="font-size: 45px; color: red; margin: 40% auto;">This article remains unpublished!</h1>
+        <h1 style="font-size: 45px; color: red; margin: 15% auto;">This article remains unpublished!</h1>
     {% endif %}
 
-        <div class="ui centered container heading">
+        <div class="ui centered container heading fixed-width" >
             <div class="ui centered rounded image">
                 <img id="heading-image" src="{{ object.thumbnail.url }}">
             </div>
@@ -26,7 +31,7 @@
         </div>
         <div class="ui horizontal divider"></div>
         <div class="ui centered container">
-            <div id="main-content" class="ui content"></div>
+            <div id="main-content" class="ui content fixed-width"></div>
         </div>
 
     </div>
@@ -44,6 +49,63 @@
 
         #main-content {
             margin: 40px auto 120px auto;
+            font-size: 1.3em;
+        }
+
+        .fixed-width {
+            width: 75% !important;
+        }
+
+        pre code {
+            border-radius: 8px;
+        }
+
+        .centered-ellipsis {
+            font-size: 2.0em;
+            letter-spacing: 1.5em;
+            text-align: center;
+            margin: 40px auto 50px auto;
+        }
+
+        .article-canvas-container {
+            display: flex;
+            justify-content: center;
+            margin: 70px;
+        }
+
+        .tiny-article-canvas {
+            height: 10%;
+            width: 20%;
+            border-radius: 4px;
+            box-shadow: 5px 10px 8px;
+        }
+
+        .small-article-canvas {
+            height: 15%;
+            width: 30%;
+            border-radius: 4px;
+            box-shadow: 5px 10px 8px;
+        }
+
+        .medium-article-canvas {
+            height: 30%;
+            width: 50%;
+            border-radius: 4px;
+            box-shadow: 5px 8px 10px #333333;
+        }
+
+        .large-article-canvas {
+            height: 50%;
+            width: 80%;
+            border-radius: 4px;
+            box-shadow: 5px 10px 8px;
+        }
+
+        .huge-article-canvas {
+            height: 70%;
+            width: 100%;
+            border-radius: 4px;
+            box-shadow: 5px 10px 8px;
         }
     </style>
 
@@ -52,6 +114,7 @@
             $.get('/static/markdown/{{ object.title }}.md', function (data) {
                 rendered_markdown = marked(data)
                 $('#main-content').html(rendered_markdown)
+                hljs.initHighlighting()
             })
         })
     </script>
