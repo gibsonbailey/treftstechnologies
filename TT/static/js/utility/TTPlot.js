@@ -14,16 +14,12 @@ class TTplot {
         const width = this.canvas.clientWidth;
         const height = this.canvas.clientHeight;
 
-        // If it's resolution does not match change it
-        if (this.canvas.width !== width || this.canvas.height !== height) {
-            this.canvas.width = width;
-            this.canvas.height = height;
-            this.width = width
-            this.height = height
-            return true;
-        }
+        const dpr = window.devicePixelRatio || 1
 
-        return false;
+        this.canvas.width = width * dpr;
+        this.canvas.height = height * dpr;
+        this.width = width * dpr
+        this.height = height * dpr
     }
 
     set_background_color = (color) => {

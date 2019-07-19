@@ -82,7 +82,7 @@ c = \\begin{bmatrix}
     \\end{bmatrix}  
 \\]
 
-</br></br></br>
+</br>
 
 \\(a\\) and \\(b\\) are orthogonal.
 
