@@ -2,6 +2,14 @@
 
 {% load static %}
 
+{% block extra_head %}
+    {% if BUILT_JS %}
+        <script src="{% static "js/built/static/js/utility/perlin.js" %}"></script>
+    {% else %}
+        <script src="{% static "js/utility/perlin.js" %}"></script>
+    {% endif %}
+{% endblock extra_head %}
+
 {% block content %}
     <div id="header-block">
         <div class="ui text container grid middle aligned">

@@ -4,6 +4,10 @@ from TT.settings.base import *
 DEBUG = True
 ALLOWED_HOSTS = ['*']
 
+BUILT_JS = True
+TEMPLATES[0]['OPTIONS']['context_processors'].append('pages.context_processors.built_js')
+
+
 CORS_REPLACE_HTTPS_REFERER      = False
 HOST_SCHEME                     = "http://"
 SECURE_PROXY_SSL_HEADER         = None

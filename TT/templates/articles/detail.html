@@ -3,8 +3,13 @@
 {% load static %}
 
 {% block extra_head %}
-    <script type="text/javascript" src="{% static "js/utility/TTPlot.js" %}"></script>
-    <script src="{% static "js/utility/perlin.js" %}"></script>
+    {% if BUILT_JS %}
+        <script src="{% static "js/built/static/js/utility/perlin.js" %}"></script>
+        <script type="text/javascript" src="{% static "js/built/static/js/utility/TTPlot.js" %}"></script>
+    {% else %}
+        <script type="text/javascript" src="{% static "js/utility/TTPlot.js" %}"></script>
+        <script src="{% static "js/utility/perlin.js" %}"></script>
+    {% endif %}
 {% endblock extra_head %}
 
 {% block content %}
@@ -73,37 +78,43 @@
             margin: 70px;
         }
 
+        .two-article-canvas-container {
+            display: flex;
+            justify-content: space-between;
+            margin: 70px 0 70px 0;
+        }
+
         .tiny-article-canvas {
-            height: 10%;
-            width: 20%;
+            height: 300px;
+            width: 300px;
             border-radius: 4px;
             box-shadow: 5px 10px 8px;
         }
 
         .small-article-canvas {
-            height: 15%;
-            width: 30%;
+            height: 380px;
+            width: 380px;
             border-radius: 4px;
             box-shadow: 5px 10px 8px;
         }
 
         .medium-article-canvas {
-            height: 30%;
-            width: 50%;
+            height: 450px;
+            width: 450px;
             border-radius: 4px;
             box-shadow: 5px 8px 10px #333333;
         }
 
         .large-article-canvas {
-            height: 50%;
-            width: 80%;
+            height: 550px;
+            width: 550px;
             border-radius: 4px;
             box-shadow: 5px 10px 8px;
         }
 
         .huge-article-canvas {
-            height: 70%;
-            width: 100%;
+            height: 700px;
+            width: 700px;
             border-radius: 4px;
             box-shadow: 5px 10px 8px;
         }

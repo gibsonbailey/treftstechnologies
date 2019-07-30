@@ -119,3 +119,7 @@ env
 django-dev/
 manage.py
 #wsgi.py
+
+# Node
+node_modules/
+

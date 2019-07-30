@@ -222,15 +222,14 @@ riot.tag2('perlin', '<canvas id="tutorial"></canvas>', 'perlin canvas,[data-is="
             })
             const plane = new THREE.Mesh(plane_geo, teal)
 
-            const grid = create_gradient_grid3D(10,10,10,true)
+            const perlin = new Perlin(3, 1, 1)
 
             function perlin_vertices3D(geometry, z) {
                 let magnitude = 0.13
                 let scale = 2
                 let length = geometry.vertices.length
                 for(let i = 0; i < length; i++) {
-                    geometry.vertices[i].z = magnitude * perlin3D(geometry.vertices[i].x * scale, geometry.vertices[i].y * scale, z, grid)
-
+                    geometry.vertices[i].z = magnitude * perlin.get_value(geometry.vertices[i].x * scale, geometry.vertices[i].y * scale, z)
                 }
                 geometry.verticesNeedUpdate = true
             }

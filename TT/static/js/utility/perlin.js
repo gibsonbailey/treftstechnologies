@@ -1,136 +1,175 @@
-function mod(x, y) {
-    return (x % y + y) % y
-}
-
-function lerp(a, b, w) {
-    return (w * a) + ((1 - w) * b)
-}
-
-function fade(x) {
-    return (6 * Math.pow(x, 5)) - (15 * Math.pow(x, 4)) + (10 * Math.pow(x, 3))
-}
-
-function dot_product(a, b) {
-    if (a.constructor !== Array) {
-        throw "First argument is not an array."
-    } else if (b.constructor !== Array) {
-        throw "Second argument is not an array."
-    } else if (a.length !== b.length) {
-        throw "Arrays are not the same length."
+class Perlin {
+    constructor(dimension, frequency, magnitude) {
+        this.magnitude = magnitude
+        this.frequency = frequency
+        this.dimension = dimension
+        if (dimension == 1 || dimension == 2) {
+            this.grid = this.create_gradient_grid2D(20, 20)
+        } else if (dimension == 3) {
+            this.grid = this.create_gradient_grid3D(20, 20, 20)
+        }
     }
 
-    let sum = 0
-    for (let i = 0; i < a.length; i++) {
-        sum += a[i] * b[i]
+    get_value = (x, y, z) => {
+        x *= this.frequency * 0.9
+        y *= this.frequency * 0.9
+        z *= this.frequency * 0.9
+
+        if (this.dimension == 1) {
+            return this.perlin2D(x, 0) * this.magnitude
+        } else if (this.dimension == 2) {
+            return this.perlin2D(x, y) * this.magnitude
+        } else if (this.dimension == 3) {
+            return this.perlin3D(x, y, z) * this.magnitude
+        }
     }
 
-    return sum
-}
+    mod = (x, y) => {
+        return (x % y + y) % y
+    }
 
-function create_random_vector(n, diagonal) {
-    vec = []
-    for(let i = 0; i < n; i++) {
-        if (diagonal) {
+    lerp = (a, b, w) => {
+        return (w * a) + ((1 - w) * b)
+    }
+
+    fade = (x) => {
+        return (6 * Math.pow(x, 5)) - (15 * Math.pow(x, 4)) + (10 * Math.pow(x, 3))
+    }
+
+    dot_product = (a, b) => {
+        if (a.constructor !== Array) {
+            throw "First argument is not an array."
+        } else if (b.constructor !== Array) {
+            throw "Second argument is not an array."
+        } else if (a.length !== b.length) {
+            throw "Arrays are not the same length."
+        }
+
+        let sum = 0
+        for (let i = 0; i < a.length; i++) {
+            sum += a[i] * b[i]
+        }
+
+        return sum
+    }
+
+    create_random_vector = (n, diagonal) => {
+        let vec = []
+        for(let i = 0; i < n; i++) {
+            if (diagonal) {
+                let component = 1
+                if (Math.random() >= 0.5) {
+                    component = -1
+                }
+                vec.push(component)
+            } else {
+                vec.push((Math.random() * 2) - 1)
+            }
+        }
+
+        return vec
+    }
+
+    perlin2D  = (x, y) => {
+        let x_node = Math.floor(x)
+        let y_node = Math.floor(y)
+        let dx = x - x_node
+        let dy = y - y_node
+
+        let dd = this.dot_product([dx, dy], this.grid.data[this.mod(y_node, this.grid.rows)][this.mod(x_node, this.grid.cols)])
+        let ud = this.dot_product([dx, (dy - 1)], this.grid.data[this.mod((y_node + 1), this.grid.rows)][this.mod(x_node, this.grid.cols)])
+        let du = this.dot_product([(dx - 1), dy], this.grid.data[this.mod(y_node, this.grid.rows)][this.mod((x_node + 1), this.grid.cols)])
+        let uu = this.dot_product([(dx - 1), (dy - 1)], this.grid.data[this.mod((y_node + 1), this.grid.rows)][this.mod((x_node + 1), this.grid.cols)])
+
+        let U = this.lerp(ud, dd, this.fade(dy))
+        let D = this.lerp(uu, du, this.fade(dy))
+        return this.lerp(D, U, this.fade(dx))
+    }
+
+    perlin3D = (x, y, z) => {
+        let x_node = Math.floor(x)
+        let y_node = Math.floor(y)
+        let z_node = Math.floor(z)
+        let dx = x - x_node
+        let dy = y - y_node
+        let dz = z - z_node
+
+
+        let ddd = this.dot_product([dx, dy, dz], this.grid.data[this.mod(y_node, this.grid.rows)][this.mod(x_node, this.grid.cols)][this.mod(z_node, this.grid.layers)])
+        let udd = this.dot_product([dx, (dy - 1), dz], this.grid.data[this.mod((y_node + 1), this.grid.rows)][this.mod(x_node, this.grid.cols)][this.mod(z_node, this.grid.layers)])
+        let dud = this.dot_product([(dx - 1), dy, dz], this.grid.data[this.mod(y_node, this.grid.rows)][this.mod((x_node + 1), this.grid.cols)][this.mod(z_node, this.grid.layers)])
+        let uud = this.dot_product([(dx - 1), (dy - 1), dz], this.grid.data[this.mod((y_node + 1), this.grid.rows)][this.mod((x_node + 1), this.grid.cols)][this.mod(z_node, this.grid.layers)])
+
+        let ddu = this.dot_product([dx, dy, (dz - 1)], this.grid.data[this.mod(y_node, this.grid.rows)][this.mod(x_node, this.grid.cols)][this.mod(z_node + 1, this.grid.layers)])
+        let udu = this.dot_product([dx, (dy - 1), (dz - 1)], this.grid.data[this.mod((y_node + 1), this.grid.rows)][this.mod(x_node, this.grid.cols)][this.mod(z_node + 1, this.grid.layers)])
+        let duu = this.dot_product([(dx - 1), dy, (dz - 1)], this.grid.data[this.mod(y_node, this.grid.rows)][this.mod((x_node + 1), this.grid.cols)][this.mod(z_node + 1, this.grid.layers)])
+        let uuu = this.dot_product([(dx - 1), (dy - 1), (dz - 1)], this.grid.data[this.mod((y_node + 1), this.grid.rows)][this.mod((x_node + 1), this.grid.cols)][this.mod(z_node + 1, this.grid.layers)])
+
+        let UD = this.lerp(udd, ddd, this.fade(dy))
+        let DD = this.lerp(uud, dud, this.fade(dy))
+
+        let UU = this.lerp(udu, ddu, this.fade(dy))
+        let DU = this.lerp(uuu, duu, this.fade(dy))
+
+        let D = this.lerp(DD, UD, this.fade(dx))
+        let U = this.lerp(DU, UU, this.fade(dx))
+
+        return this.lerp(U, D, this.fade(dz))
+    }
+
+    create_gradient_grid3D = (n, m, k) => {
+        let dimension = 3
+
+        let grid = {
+            rows: n,
+            cols: m,
+            layers: k,
+            data: [],
+        }
+
+        for(let i = 0; i < n; i++) {
+            let row = []
+            for(let j = 0; j < m; j++) {
+                let col = []
+                for(let q = 0; q < k; q++) {
+                    col.push(this.create_random_vector(dimension))
+                }
+                row.push(col)
+            }
+            grid.data.push(row)
+        }
+
+        return grid
+    }
+
+    create_gradient_grid2D = (n,m) => {
+        let dimension = 2
+
+        let grid = {
+            rows: n,
+            cols: m,
+            data: [],
+        }
+        for(let i = 0; i < n; i++) {
+            let row = []
+            for(let j = 0; j < m; j++) {
+                row.push(this.create_random_vector(dimension))
+            }
+            grid.data.push(row)
+        }
+
+        return grid
+    }
+
+    create_random_vector = (n) => {
+        let vec = []
+        for(let i = 0; i < n; i++) {
             let component = 1
             if (Math.random() >= 0.5) {
                 component = -1
             }
             vec.push(component)
-        } else {
-            vec.push((Math.rand() * 2) - 1)
         }
+        return vec
     }
-
-    return vec
-}
-
-function create_gradient_grid3D(n, m, k, diagonal) {
-    let dimension = 3
-
-    let grid = {
-        rows: n,
-        cols: m,
-        layers: k,
-        data: [],
-    }
-
-    for(let i = 0; i < n; i++) {
-        let row = []
-        for(let j = 0; j < m; j++) {
-            let col = []
-            for(let q = 0; q < k; q++) {
-                col.push(create_random_vector(dimension, diagonal))
-            }
-            row.push(col)
-        }
-        grid.data.push(row)
-    }
-
-    return grid
-}
-
-function create_gradient_grid2D(n,m, diagonal) {
-    let dimension = 2
-
-    let grid = {
-        rows: n,
-        cols: m,
-        data: [],
-    }
-    for(let i = 0; i < n; i++) {
-        let row = []
-        for(let j = 0; j < m; j++) {
-            row.push(create_random_vector(dimension, diagonal))
-        }
-        grid.data.push(row)
-    }
-
-    return grid
-}
-
-function perlin3D (x, y, z, grid) {
-    let x_node = Math.floor(x)
-    let y_node = Math.floor(y)
-    let z_node = Math.floor(z)
-    let dx = x - x_node
-    let dy = y - y_node
-    let dz = z - z_node
-
-
-    let ddd = dot_product([dx, dy, dz], grid.data[mod(y_node, grid.rows)][mod(x_node, grid.cols)][mod(z_node, grid.layers)])
-    let udd = dot_product([dx, (dy - 1), dz], grid.data[mod((y_node + 1), grid.rows)][mod(x_node, grid.cols)][mod(z_node, grid.layers)])
-    let dud = dot_product([(dx - 1), dy, dz], grid.data[mod(y_node, grid.rows)][mod((x_node + 1), grid.cols)][mod(z_node, grid.layers)])
-    let uud = dot_product([(dx - 1), (dy - 1), dz], grid.data[mod((y_node + 1), grid.rows)][mod((x_node + 1), grid.cols)][mod(z_node, grid.layers)])
-
-    let ddu = dot_product([dx, dy, (dz - 1)], grid.data[mod(y_node, grid.rows)][mod(x_node, grid.cols)][mod(z_node + 1, grid.layers)])
-    let udu = dot_product([dx, (dy - 1), (dz - 1)], grid.data[mod((y_node + 1), grid.rows)][mod(x_node, grid.cols)][mod(z_node + 1, grid.layers)])
-    let duu = dot_product([(dx - 1), dy, (dz - 1)], grid.data[mod(y_node, grid.rows)][mod((x_node + 1), grid.cols)][mod(z_node + 1, grid.layers)])
-    let uuu = dot_product([(dx - 1), (dy - 1), (dz - 1)], grid.data[mod((y_node + 1), grid.rows)][mod((x_node + 1), grid.cols)][mod(z_node + 1, grid.layers)])
-
-    let UD = lerp(udd, ddd, fade(dy))
-    let DD = lerp(uud, dud, fade(dy))
-
-    let UU = lerp(udu, ddu, fade(dy))
-    let DU = lerp(uuu, duu, fade(dy))
-
-    let D = lerp(DD, UD, fade(dx))
-    let U = lerp(DU, UU, fade(dx))
-
-    return lerp(U, D, fade(dz))
-}
-
-function perlin2D (x, y, grid) {
-    let x_node = Math.floor(x)
-    let y_node = Math.floor(y)
-    let dx = x - x_node
-    let dy = y - y_node
-
-    let dd = dot_product([dx, dy], grid.data[mod(y_node, grid.rows)][mod(x_node, grid.cols)])
-    let ud = dot_product([dx, (dy - 1)], grid.data[mod((y_node + 1), grid.rows)][mod(x_node, grid.cols)])
-    let du = dot_product([(dx - 1), dy], grid.data[mod(y_node, grid.rows)][mod((x_node + 1), grid.cols)])
-    let uu = dot_product([(dx - 1), (dy - 1)], grid.data[mod((y_node + 1), grid.rows)][mod((x_node + 1), grid.cols)])
-
-    let U = lerp(ud, dd, fade(dy))
-    let D = lerp(uu, du, fade(dy))
-    return lerp(D, U, fade(dx))
 }

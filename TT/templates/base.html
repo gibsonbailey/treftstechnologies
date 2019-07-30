@@ -21,7 +21,7 @@
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-        <script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML"></script>
 
     {% block extra_head %}
     {% endblock extra_head %}
@@ -127,7 +127,6 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/105/three.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/4.2.2/jquery.form.min.js"></script>
         <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/highlight.min.js"></script>
-        <script src="{% static "js/utility/perlin.js" %}"></script>
         {% block extra_js %}
         {% endblock extra_js %}
         <script>
@@ -173,7 +172,32 @@
 
             TT.user.pk = '{{ request.user.pk }}'
             TT.user.is_superuser = '{{ request.user.is_superuser }}' === 'True'
+            var TT_blue = 'rgba(0, 38, 66, 1)'
+            var TT_light_blue ='rgb(110, 207, 255)'
+            var TT_red = 'rgba(132, 0, 50, 1)'
+            var TT_yellow = 'rgba(229, 149, 0, 1)'
+            var TT_brown = 'rgb(97, 67, 14)'
+            var TT_cream = 'rgba(229, 218, 218, 1)'
+            var TT_beige = 'rgba(188, 171, 174, 1)'
 
+            TT.colors = [
+                TT_blue,
+                TT_light_blue,
+                TT_red,
+                TT_yellow,
+                TT_brown,
+                TT_cream,
+                TT_beige,
+            ]
+            TT.colors.random = () => {
+                function getRandomInt(min, max) {
+                    min = Math.ceil(min);
+                    max = Math.floor(max);
+                    return Math.floor(Math.random() * (max - min + 1)) + min;
+                }
+                let max = TT.colors.length - 1
+                return TT.colors[getRandomInt(0, max)]
+            }
 
 
 
@@ -344,13 +368,6 @@
                 let csrf = data.csrfmiddlewaretoken
             })
 
-            var TT_blue = 'rgba(0, 38, 66, 1)'
-            var TT_light_blue ='rgb(110, 207, 255)'
-            var TT_red = 'rgba(132, 0, 50, 1)'
-            var TT_yellow = 'rgba(229, 149, 0, 1)'
-            var TT_brown = 'rgb(97, 67, 14)'
-            var TT_cream = 'rgba(229, 218, 218, 1)'
-            var TT_beige = 'rgba(188, 171, 174, 1)'
         </script>
         <style>
             :root {
