@@ -71,7 +71,8 @@ graph below, one possible combination of these values is shown.
 First, I'll discuss the original 2-dimensional Perlin noise. This can easily be used to create 1-dimensional
 noise. Next, 3-dimensional noise will be implemented as a modification to the algorithm for 2-dimensional noise.
 
-Throughout this tutorial, we'll be developing a JavaScript class that can be used to generate Perlin noise.
+Throughout this tutorial, we'll be developing a JavaScript class that can be used to generate Perlin noise. The 
+completed code can be found on [Github here].
 
 ### Initialize Vector Field
 
@@ -128,7 +129,7 @@ Below is a visualization of what has just been initialized.
 ### Calculate Dot Products
 
 The dot product calculation in the Perlin noise algorithm will be discussed, but first, a short
-introduction of the dot product is in order. Skip this section if you are already knowledgeable 
+introduction of the dot product is in order. [Skip this section](#perlin-dot-product) if you are already knowledgeable 
 on this subject of mathematics.
 
 ### Dot Product Introduction
@@ -181,14 +182,14 @@ a \cdot b = (2 \cdot -2) + (1 \cdot 4) = 0
 <div class="article-canvas-container static-canvas">
     <canvas id="a-c-vector-graph" class="large-article-canvas"></canvas>
 </div>
-
+<a name="perlin-dot-product"></a>
 \\[
 a \cdot c = (2 \cdot 1) + (1 \cdot 1) = 3
 \\]
 
 </br></br>
 
-### Dot Product Calculation for Perlin Noise
+###  Dot Product Calculation for Perlin Noise
 
 At this point, a 2D grid of 2D vectors has been generated. For each
 output value that will be generated, there will be four dot products 
@@ -582,3 +583,5 @@ ab_vec.set_arrows([a, b])
 ac_vec.set_arrows([a, c])
 
 </script>
+
+[Github here]: https://github.com/gibsonbailey/treftstechnologies/blob/master/TT/static/js/utility/perlin.js 
