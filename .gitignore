@@ -117,6 +117,7 @@ uwsgi-django/
 logs/
 env
 django-dev/
+VIRT_ENV/
 manage.py
 #wsgi.py
 

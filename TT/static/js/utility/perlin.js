@@ -36,6 +36,10 @@ class Perlin {
         return (6 * Math.pow(x, 5)) - (15 * Math.pow(x, 4)) + (10 * Math.pow(x, 3))
     }
 
+    smerp = (a, b, w) => {
+        return this.lerp(a, b, this.fade(w))
+    }
+
     dot_product = (a, b) => {
         if (a.constructor !== Array) {
             throw "First argument is not an array."
@@ -76,14 +80,16 @@ class Perlin {
         let dx = x - x_node
         let dy = y - y_node
 
-        let dd = this.dot_product([dx, dy], this.grid.data[this.mod(y_node, this.grid.rows)][this.mod(x_node, this.grid.cols)])
-        let ud = this.dot_product([dx, (dy - 1)], this.grid.data[this.mod((y_node + 1), this.grid.rows)][this.mod(x_node, this.grid.cols)])
-        let du = this.dot_product([(dx - 1), dy], this.grid.data[this.mod(y_node, this.grid.rows)][this.mod((x_node + 1), this.grid.cols)])
+        // Dot Products
+        let ll = this.dot_product([dx, dy], this.grid.data[this.mod(y_node, this.grid.rows)][this.mod(x_node, this.grid.cols)])
+        let lu = this.dot_product([dx, (dy - 1)], this.grid.data[this.mod((y_node + 1), this.grid.rows)][this.mod(x_node, this.grid.cols)])
+        let ul = this.dot_product([(dx - 1), dy], this.grid.data[this.mod(y_node, this.grid.rows)][this.mod((x_node + 1), this.grid.cols)])
         let uu = this.dot_product([(dx - 1), (dy - 1)], this.grid.data[this.mod((y_node + 1), this.grid.rows)][this.mod((x_node + 1), this.grid.cols)])
 
-        let U = this.lerp(ud, dd, this.fade(dy))
-        let D = this.lerp(uu, du, this.fade(dy))
-        return this.lerp(D, U, this.fade(dx))
+        // Smooth Interpolation
+        let U = this.smerp(lu, ll, dy)
+        let L = this.smerp(uu, ul, dy)
+        return this.smerp(L, U, dx)
     }
 
     perlin3D = (x, y, z) => {
@@ -105,16 +111,16 @@ class Perlin {
         let duu = this.dot_product([(dx - 1), dy, (dz - 1)], this.grid.data[this.mod(y_node, this.grid.rows)][this.mod((x_node + 1), this.grid.cols)][this.mod(z_node + 1, this.grid.layers)])
         let uuu = this.dot_product([(dx - 1), (dy - 1), (dz - 1)], this.grid.data[this.mod((y_node + 1), this.grid.rows)][this.mod((x_node + 1), this.grid.cols)][this.mod(z_node + 1, this.grid.layers)])
 
-        let UD = this.lerp(udd, ddd, this.fade(dy))
-        let DD = this.lerp(uud, dud, this.fade(dy))
+        let UD = this.smerp(udd, ddd, dy)
+        let DD = this.smerp(uud, dud, dy)
 
-        let UU = this.lerp(udu, ddu, this.fade(dy))
-        let DU = this.lerp(uuu, duu, this.fade(dy))
+        let UU = this.smerp(udu, ddu, dy)
+        let DU = this.smerp(uuu, duu, dy)
 
-        let D = this.lerp(DD, UD, this.fade(dx))
-        let U = this.lerp(DU, UU, this.fade(dx))
+        let D = this.smerp(DD, UD, dx)
+        let U = this.smerp(DU, UU, dx)
 
-        return this.lerp(U, D, this.fade(dz))
+        return this.smerp(U, D, dz)
     }
 
     create_gradient_grid3D = (n, m, k) => {

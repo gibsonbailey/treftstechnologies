@@ -71,12 +71,14 @@ graph below, one possible combination of these values is shown.
 First, I'll discuss the original 2-dimensional Perlin noise. This can easily be used to create 1-dimensional
 noise. Next, 3-dimensional noise will be implemented as a modification to the algorithm for 2-dimensional noise.
 
+Throughout this tutorial, we'll be developing a JavaScript class that can be used to generate Perlin noise.
+
 ### Initialize Vector Field
 
 The 2-dimensional vector field of random 2-dimensional vectors will be held as a two-dimensional array of vectors. 
 Each vector will be generated with an x and y component of equal magnitude. This creates the effect of diagonal
 vectors. To simplify, both the x and y components will be set to either \\(1\\)  or \\(-1\\) randomly. The JavaScript 
-code below is built to generate an \\(n\\)-dimensional vector which will be useful later.
+code below is built to generate an \\(n\\)-dimensional, diagonal vector which will be useful later.
 
 ```
     create_random_vector = (n) => {
@@ -192,21 +194,155 @@ At this point, a 2D grid of 2D vectors has been generated. For each
 output value that will be generated, there will be four dot products 
 to calculate, one for each neighboring grid point of the input coordinates. 
 
-On the graph below, place your mouse at any point. You'll see a blue vector from 
-the base of the inhabited cell to your cursor. This is the vector that will be 
-dotted with the four closest grid vectors. These vectors have been scaled for the 
-sake of aesthetics, but their \\(x\\) and \\(y\\) components are all either 1 or -1.
+On the graph below, place your mouse at any point. You'll see a blue vector and 
+three brown vectors that extend from each corner of the inhabited cell to your cursor. 
+Each of these vectors will be dotted with their corresponding grid vector, the white vector 
+that shares a given base. These white grid vectors have been scaled for the sake of 
+aesthetics, but their \\(x\\) and \\(y\\) components are all either 1 or -1.
 
 <div class="article-canvas-container static-canvas">
     <canvas id="vector-field-dot-graph" class="large-article-canvas"></canvas>
 </div>
 
-In order to build the vector which the blue cursor vector represents, the vector 
-controlling the output of our `get_value` function, we must know which cell the 
-cursor (or general input) coordinates are in.
+Let's now build the colored vectors. The brown vectors can be defined in terms of the
+blue one, so we'll define that one first. 
+
+To start, we must know which cell the cursor (or general input) coordinates are in. 
+This can be calculated as a difference between the 
+coordinates of the tip of the blue vector (cursor location) and the coordinates of 
+the corresponding grid vertex (at its base). Below, the coordinates of the head of the
+blue vector are labeled as `x` and `y`. 
+
+```
+   let x_node = Math.floor(x)
+   let y_node = Math.floor(y)
+   let dx = x - x_node
+   let dy = y - y_node
+```
+
+`dx` and `dy` above represent the horizontal and vertical components of the blue
+vector. We will call the  vector \\(b\\). `x_node` and `y_node` can be used to identify
+which grid cell the input value inhabits.
+
+\\[
+b = \\begin{bmatrix} 
+    dx \\\\ 
+    dy \\\\ 
+    \\end{bmatrix}  
+\\]
+
+Each of the brown vectors can be calculated in the following manner. Each grid cell's width
+and height are both \\(1\\). We can subtract \\(b\\) from a vector pointing to each corner
+of the cell to find that corner's brown (or blue) vector.
+
+In the following definition, we'll label the four corner vectors \\(c\\) with two subscripts representing the
+x and y positions within a cell. For example, \\(c_{0,1}\\) is the vector from \\((0, 0)\\) to the left, upper 
+corner at \\((0, 1)\\).
+
+We will now define the vectors from each corner to the head of the blue vector. We'll 
+call these vectors \\(a_{x,y}\\).
+
+\\[
+    a_{x,y} = b - c_{x,y}
+\\]
+
+For example, the lower left vector, \\(a_{0,0}\\) is \\( \\begin{bmatrix} dx\\\\ dy\\\\ \\end{bmatrix} - \\begin{bmatrix} 0\\\\ 0\\\\ \\end{bmatrix}\\),
+ or just \\(b\\).
+ 
+We need a couple of utility functions, namely `mod` and `dot_product` which are defined below.
+
+```
+    mod = (x, y) => {
+        return (x % y + y) % y
+    }
+    
+    dot_product = (a, b) => {
+        if (a.constructor !== Array) {
+            throw "First argument is not an array."
+        } else if (b.constructor !== Array) {
+            throw "Second argument is not an array."
+        } else if (a.length !== b.length) {
+            throw "Arrays are not the same length."
+        }
+
+        let sum = 0
+        for (let i = 0; i < a.length; i++) {
+            sum += a[i] * b[i]
+        }
+
+        return sum
+    }
+```
+
+The dot products between our \\(a\\) vectors and their corresponding grid vectors can be calculated now.
+
+```
+    let ll = this.dot_product([dx, dy], this.grid.data[this.mod(y_node, this.grid.rows)][this.mod(x_node, this.grid.cols)])
+    let lu = this.dot_product([dx, (dy - 1)], this.grid.data[this.mod((y_node + 1), this.grid.rows)][this.mod(x_node, this.grid.cols)])
+    let ul = this.dot_product([(dx - 1), dy], this.grid.data[this.mod(y_node, this.grid.rows)][this.mod((x_node + 1), this.grid.cols)])
+    let uu = this.dot_product([(dx - 1), (dy - 1)], this.grid.data[this.mod((y_node + 1), this.grid.rows)][this.mod((x_node + 1), this.grid.cols)])
+```
+
+`l` and `u` represent the upper and lower x and y values, 0 and 1.
 
 ### Interpolate Between Dot Products
 
+In order to get a smoothly varying function of input values, we can interpolate between the 4 values calculated above.
+First, interpolate between `lu` and `ll`, then between `uu` and `ul`, then between the two values produced by the prior interpolations.
+
+Linear interpolation can be defined as below.
+
+```
+    lerp = (a, b, w) => {
+        return (w * a) + ((1 - w) * b)
+    }
+```
+
+Where `a` and `b` are the bounding values to interpolate between and w is a value between zero and one that defines how far
+between `a` and `b` to interpolate.
+
+Perlin noise uses a modified interpolation function to increase the smoothness and organic nature of the noise. There is a set 
+of functions called _smoothstep_ or _fade_ functions, characterized by their smoothness and null derivative at 0 and 1.
+Ken Perlin chose a _smoothstep_ function \\(f(x) = 6x^5 - 15x^4 + 10x^3\\) (plotted below) of which both the first and second derivatives are 
+zero at \\(x=0\\) and \\(x=1\\).
+
+# Graph of SmootherStep Function
+
+```
+    fade = (x) => {
+        return (6 * Math.pow(x, 5)) - (15 * Math.pow(x, 4)) + (10 * Math.pow(x, 3))
+    }
+```
+
+Now, when we interpolate between the dot products, we'll use the smooth interpolation interpolation function defined below.
+
+```
+    smerp = (a, b, w) => {
+        return this.lerp(a, b, this.fade(w))
+    }
+```
+
+At this point, the whole `perlin2D` function is ready to be assembled.
+
+```
+    perlin2D  = (x, y) => {
+        let x_node = Math.floor(x)
+        let y_node = Math.floor(y)
+        let dx = x - x_node
+        let dy = y - y_node
+
+        // Dot Products
+        let ll = this.dot_product([dx, dy], this.grid.data[this.mod(y_node, this.grid.rows)][this.mod(x_node, this.grid.cols)])
+        let lu = this.dot_product([dx, (dy - 1)], this.grid.data[this.mod((y_node + 1), this.grid.rows)][this.mod(x_node, this.grid.cols)])
+        let ul = this.dot_product([(dx - 1), dy], this.grid.data[this.mod(y_node, this.grid.rows)][this.mod((x_node + 1), this.grid.cols)])
+        let uu = this.dot_product([(dx - 1), (dy - 1)], this.grid.data[this.mod((y_node + 1), this.grid.rows)][this.mod((x_node + 1), this.grid.cols)])
+
+        // Smooth Interpolation
+        let U = this.smerp(lu, ll, dy)
+        let L = this.smerp(uu, ul, dy)
+        return this.smerp(L, U, dx)
+    }
+```
 
 <div class="centered-ellipsis">...</div>
 
