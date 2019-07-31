@@ -307,7 +307,9 @@ of functions called _smoothstep_ or _fade_ functions, characterized by their smo
 Ken Perlin chose a _smoothstep_ function \\(f(x) = 6x^5 - 15x^4 + 10x^3\\) (plotted below) of which both the first and second derivatives are 
 zero at \\(x=0\\) and \\(x=1\\).
 
-# Graph of SmootherStep Function
+<div class="article-canvas-container static-canvas">
+    <canvas id="smootherstep-graph" class="large-article-canvas"></canvas>
+</div>
 
 ```
     fade = (x) => {
@@ -487,20 +489,18 @@ function draw_cursor_arrow(ob, c_x, c_y) {
     let x_base = Math.floor(cursor_pos.x)
     let y_base = Math.floor(cursor_pos.y) + 1
     
-    let arrow_start = ob.grid_to_canvas_space(x_base, y_base)
     let label = {}
     label.text = '(' + (cursor_pos.x - x_base).toFixed(2) + ', ' + (y_base - cursor_pos.y).toFixed(2) + ')'
     label.color = 'white'
+    
+    ob.draw_arrow(x_base + 1, y_base - 1, cursor_pos.x - x_base - 1, y_base - cursor_pos.y - 1, 3, TT_brown)
+    ob.draw_arrow(x_base + 1, y_base, cursor_pos.x - x_base - 1, y_base - cursor_pos.y, 3, TT_brown)
+    ob.draw_arrow(x_base, y_base - 1, cursor_pos.x - x_base, y_base - cursor_pos.y - 1, 3, TT_brown)
     ob.draw_arrow(x_base, y_base, cursor_pos.x - x_base, y_base - cursor_pos.y, 3, TT_light_blue, label)
 }
 
 
 vec_dot.set_extra_draw_func(draw_cursor_arrow)
-
-//for (let i = 0; i < vec_field_array.length; i++) {
-//    vec_field_array[i].color = TT_blue
-//}
-
 vec_dot.set_arrows(vec_field_array)
 
 
@@ -581,6 +581,32 @@ let c = {
 
 ab_vec.set_arrows([a, b])
 ac_vec.set_arrows([a, c])
+
+/*******************************/
+/* Smootherstep Function Graph */
+/*******************************/
+
+smootherstep_canvas = document.getElementById('smootherstep-graph') 
+smootherstep = new TTplot(smootherstep_canvas, 350, background_color)
+
+axis_config = {
+    origin: {
+        x: 100,
+        y: 100,
+    },
+    line_width: 2,
+    color: 'rgb(225, 227, 230)',
+    grid: false,
+}
+
+smootherstep.axes(axis_config)
+let smootherstep_function_options = {
+    line_width: 2,
+    color: 'white',
+    res: 1,
+}
+
+smootherstep.set_func( (x) => (6 * Math.pow(x, 5)) + (-15 * Math.pow(x, 4)) + (10 * Math.pow(x, 3)), smootherstep_function_options)
 
 </script>
 
