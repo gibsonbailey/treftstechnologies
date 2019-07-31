@@ -100,27 +100,24 @@ class Perlin {
         let dy = y - y_node
         let dz = z - z_node
 
-
-        let ddd = this.dot_product([dx, dy, dz], this.grid.data[this.mod(y_node, this.grid.rows)][this.mod(x_node, this.grid.cols)][this.mod(z_node, this.grid.layers)])
-        let udd = this.dot_product([dx, (dy - 1), dz], this.grid.data[this.mod((y_node + 1), this.grid.rows)][this.mod(x_node, this.grid.cols)][this.mod(z_node, this.grid.layers)])
-        let dud = this.dot_product([(dx - 1), dy, dz], this.grid.data[this.mod(y_node, this.grid.rows)][this.mod((x_node + 1), this.grid.cols)][this.mod(z_node, this.grid.layers)])
-        let uud = this.dot_product([(dx - 1), (dy - 1), dz], this.grid.data[this.mod((y_node + 1), this.grid.rows)][this.mod((x_node + 1), this.grid.cols)][this.mod(z_node, this.grid.layers)])
-
-        let ddu = this.dot_product([dx, dy, (dz - 1)], this.grid.data[this.mod(y_node, this.grid.rows)][this.mod(x_node, this.grid.cols)][this.mod(z_node + 1, this.grid.layers)])
-        let udu = this.dot_product([dx, (dy - 1), (dz - 1)], this.grid.data[this.mod((y_node + 1), this.grid.rows)][this.mod(x_node, this.grid.cols)][this.mod(z_node + 1, this.grid.layers)])
-        let duu = this.dot_product([(dx - 1), dy, (dz - 1)], this.grid.data[this.mod(y_node, this.grid.rows)][this.mod((x_node + 1), this.grid.cols)][this.mod(z_node + 1, this.grid.layers)])
+        let lll = this.dot_product([dx, dy, dz], this.grid.data[this.mod(y_node, this.grid.rows)][this.mod(x_node, this.grid.cols)][this.mod(z_node, this.grid.layers)])
+        let llu = this.dot_product([dx, dy, (dz - 1)], this.grid.data[this.mod(y_node, this.grid.rows)][this.mod(x_node, this.grid.cols)][this.mod(z_node + 1, this.grid.layers)])
+        let lul = this.dot_product([dx, (dy - 1), dz], this.grid.data[this.mod((y_node + 1), this.grid.rows)][this.mod(x_node, this.grid.cols)][this.mod(z_node, this.grid.layers)])
+        let luu = this.dot_product([dx, (dy - 1), (dz - 1)], this.grid.data[this.mod((y_node + 1), this.grid.rows)][this.mod(x_node, this.grid.cols)][this.mod(z_node + 1, this.grid.layers)])
+        let ull = this.dot_product([(dx - 1), dy, dz], this.grid.data[this.mod(y_node, this.grid.rows)][this.mod((x_node + 1), this.grid.cols)][this.mod(z_node, this.grid.layers)])
+        let ulu = this.dot_product([(dx - 1), dy, (dz - 1)], this.grid.data[this.mod(y_node, this.grid.rows)][this.mod((x_node + 1), this.grid.cols)][this.mod(z_node + 1, this.grid.layers)])
+        let uul = this.dot_product([(dx - 1), (dy - 1), dz], this.grid.data[this.mod((y_node + 1), this.grid.rows)][this.mod((x_node + 1), this.grid.cols)][this.mod(z_node, this.grid.layers)])
         let uuu = this.dot_product([(dx - 1), (dy - 1), (dz - 1)], this.grid.data[this.mod((y_node + 1), this.grid.rows)][this.mod((x_node + 1), this.grid.cols)][this.mod(z_node + 1, this.grid.layers)])
 
-        let UD = this.smerp(udd, ddd, dy)
-        let DD = this.smerp(uud, dud, dy)
+        let UL = this.smerp(lul, lll, dy)
+        let LL = this.smerp(uul, ull, dy)
+        let UU = this.smerp(luu, llu, dy)
+        let LU = this.smerp(uuu, ulu, dy)
 
-        let UU = this.smerp(udu, ddu, dy)
-        let DU = this.smerp(uuu, duu, dy)
+        let L = this.smerp(LL, UL, dx)
+        let U = this.smerp(LU, UU, dx)
 
-        let D = this.smerp(DD, UD, dx)
-        let U = this.smerp(DU, UU, dx)
-
-        return this.smerp(U, D, dz)
+        return this.smerp(U, L, dz)
     }
 
     create_gradient_grid3D = (n, m, k) => {
