@@ -10,6 +10,8 @@
         <script type="text/javascript" src="{% static "js/utility/TTPlot.js" %}"></script>
         <script src="{% static "js/utility/perlin.js" %}"></script>
     {% endif %}
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<!--    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML"></script> -->
 {% endblock extra_head %}
 
 {% block content %}
@@ -126,6 +128,12 @@
                 rendered_markdown = marked(data)
                 $('#main-content').html(rendered_markdown)
                 hljs.initHighlighting()
+
+                console.log('loading MathJax')
+                var mathJax_script = document.createElement('script')
+                mathJax_script.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML'
+                document.head.appendChild(mathJax_script)
+                console.log('loaded MathJax')
             })
         })
     </script>

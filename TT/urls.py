@@ -11,9 +11,10 @@ urlpatterns = [
 
     # Django default
     path('admin/', admin.site.urls),
-#    path('allauth/', include(('allauth.urls', 'allauth'), namespace='allauth')),
     path('accounts/', include('allauth.urls')),
-    #path('accounts/', include(('django.contrib.auth.urls', 'accounts'), namespace='accounts')),
+
+    # Third Party
+    path('djga/', include('google_analytics.urls')),
 ]
 
 if settings.DEBUG:
