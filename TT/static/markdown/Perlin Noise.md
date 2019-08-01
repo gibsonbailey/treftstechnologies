@@ -183,6 +183,7 @@ a \cdot b = (2 \cdot -2) + (1 \cdot 4) = 0
     <canvas id="a-c-vector-graph" class="large-article-canvas"></canvas>
 </div>
 <a name="perlin-dot-product"></a>
+
 \\[
 a \cdot c = (2 \cdot 1) + (1 \cdot 1) = 3
 \\]
