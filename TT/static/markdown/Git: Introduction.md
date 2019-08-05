@@ -47,7 +47,17 @@ git --version
 
 If the terminal responds with `git version x.x.x`, then you have succeeded!
 
+## Git Setup
+
+Git will stamp your identity on every contribution, or `commit` in Git lingo. Give Git your name
+and email by setting the name and email variables with the following commands.
+
+```
+git config --global user.name "Sir Lemmiwinks"
+git config --global user.email "lemmiwinks@gmail.com"
+```
+
 ## Conclusion
 
-Now that Git is installed, it makes sense to learn the commands to execute the most common actions.
-Continue with the next tutorial.
+Now that Git is installed and set up, learn the commands to execute the most common actions in the next tutorial.
+
