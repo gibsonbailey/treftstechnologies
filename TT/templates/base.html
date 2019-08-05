@@ -1,10 +1,13 @@
 {% load static %}
 <html>
     <head>
-        {% load google_analytics_tags %}
-        <div style="display:none">
-            <img src="{% google_analytics %}" width="0" height="0" />
-        </div>
+        {% if not DEBUG %}
+            {% load google_analytics_tags %}
+            <div style="display:none">
+                <img src="{% google_analytics %}" width="0" height="0" />
+            </div>
+        {% endif %}
+
         {% if object.title %}
             <title>{{ object.title }}</title>
         {% else %}
