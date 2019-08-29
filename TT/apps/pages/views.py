@@ -15,3 +15,6 @@ class HomePageView(TemplateView):
         data['registration_form'] = registration_form
         return data
 
+class WebGLCubeView(TemplateView):
+    template_name = 'pages/webgl_cube.html'
+

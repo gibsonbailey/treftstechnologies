@@ -1,0 +1,333 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block extra_head %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gl-matrix/2.8.1/gl-matrix-min.js"></script>
+    <script src="{% static 'js/utility/webgl.js' %}"></script>
+{% endblock extra_head %}
+
+{% block content %}
+
+    <canvas id="triangle"></canvas>
+    <img id="faces-image" src="{% static 'ck_faces/Faces-Texture.png'%}" style="display: none;">
+
+    <style>
+    #triangle {
+        display: block;
+        margin: 200px auto 200px auto;
+    }
+    </style>
+
+    <script>
+
+        const cube_fragment_shader_url = '{% static 'shaders/spinning_cube/cube_fragment.glsl' %}'
+        const cube_vertex_shader_url = '{% static 'shaders/spinning_cube/cube_vertex.glsl' %}'
+        let cube_frag_shader_text = null
+        let cube_vert_shader_text = null
+
+        const render_to_texture = false
+
+        $(document).ready( function () {
+            let promise_cube_fragment = $.get(cube_fragment_shader_url)
+            let promise_cube_vertex = $.get(cube_vertex_shader_url)
+
+            Promise.all([promise_cube_vertex, promise_cube_fragment]).then(function (d) {
+                cube_vert_shader_text = d[0]
+                cube_frag_shader_text = d[1]
+                initialize()
+            })
+        })
+
+
+        let initialize = function () {
+            let canvas = document.getElementById('triangle')
+            let height = 800
+            let width = 1000
+            let dpr = window.devicePixelRatio
+            console.info('Device Pixel Ratio: ', dpr)
+
+            canvas.height = height * dpr
+            canvas.width = width * dpr
+            canvas.style.height = height + 'px'
+            canvas.style.width = width + 'px'
+
+            let gl = canvas.getContext('webgl')
+
+            if (!gl) {
+                gl = canvas.getContext('experimental-webgl')
+            }
+
+            if (!gl) {
+                alert('WebGL not supported.')
+            }
+
+            gl.clearColor(0.95, 0.95, 0.95, 1.0)
+            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+            gl.enable(gl.CULL_FACE)
+            gl.cullFace(gl.FRONT)
+            gl.frontFace(gl.CW)
+            gl.enable(gl.DEPTH_TEST)
+
+            program = build_program(gl, cube_vert_shader_text, cube_frag_shader_text, 'cube')
+
+            let boxVertices =
+            	[ // X, Y, Z           U, V       Normals
+            		// Top
+            		-1.0, 1.0, -1.0,   0.0, 0.167,     0.0, 1.0, 0.0,
+            		-1.0, 1.0, 1.0,    0.0, 0.333,     0.0, 1.0, 0.0,
+            		1.0, 1.0, 1.0,     1.0, 0.333,     0.0, 1.0, 0.0,
+            		1.0, 1.0, -1.0,    1.0, 0.167,     0.0, 1.0, 0.0,
+
+            		// Left
+            		-1.0, 1.0, 1.0,    1.0, 0.167,     -1.0, 0.0, 0.0,
+            		-1.0, -1.0, 1.0,   0.0, 0.167,     -1.0, 0.0, 0.0,
+            		-1.0, -1.0, -1.0,  0.0, 0.0,     -1.0, 0.0, 0.0,
+            		-1.0, 1.0, -1.0,   1.0, 0.0,     -1.0, 0.0, 0.0,
+
+            		// Right
+            		1.0, 1.0, 1.0,    1.0, 0.5,      1.0, 0.0, 0.0,
+            		1.0, -1.0, 1.0,   0.0, 0.5,      1.0, 0.0, 0.0,
+            		1.0, -1.0, -1.0,  0.0, 0.333,      1.0, 0.0, 0.0,
+            		1.0, 1.0, -1.0,   1.0, 0.333,      1.0, 0.0, 0.0,
+
+            		// Front
+            		1.0, 1.0, 1.0,    1.0, 0.667,      0.0, 0.0, 1.0,
+            		1.0, -1.0, 1.0,   1.0, 0.5,      0.0, 0.0, 1.0,
+            		-1.0, -1.0, 1.0,  0.0, 0.5,      0.0, 0.0, 1.0,
+            		-1.0, 1.0, 1.0,   0.0, 0.667,      0.0, 0.0, 1.0,
+
+            		// Back
+            		1.0, 1.0, -1.0,    1.0, 0.833,     0.0, 0.0, -1.0,
+            		1.0, -1.0, -1.0,   1.0, 0.667,     0.0, 0.0, -1.0,
+            		-1.0, -1.0, -1.0,  0.0, 0.667,     0.0, 0.0, -1.0,
+            		-1.0, 1.0, -1.0,   0.0, 0.833,     0.0, 0.0, -1.0,
+
+            		// Bottom
+            		-1.0, -1.0, -1.0,   0.0, 0.833,    0.0, -1.0, 0.0,
+            		-1.0, -1.0, 1.0,    0.0, 1.0,    0.0, -1.0, 0.0,
+            		1.0, -1.0, 1.0,     1.0, 1.0,    0.0, -1.0, 0.0,
+            		1.0, -1.0, -1.0,    1.0, 0.833,    0.0, -1.0, 0.0,
+            	];
+
+            let screenboxVertices =
+                [ // X, Y, Z           U, V       Normals
+                    // Top
+                    -1.0, 1.0, -1.0,   0.0, 0.0,     0.0, 1.0, 0.0,
+                    -1.0, 1.0, 1.0,    0.0, 1.0,     0.0, 1.0, 0.0,
+                    1.0, 1.0, 1.0,     1.0, 1.0,     0.0, 1.0, 0.0,
+                    1.0, 1.0, -1.0,    1.0, 0.0,     0.0, 1.0, 0.0,
+
+                    // Left
+                    -1.0, 1.0, 1.0,    1.0, 1.0,     -1.0, 0.0, 0.0,
+                    -1.0, -1.0, 1.0,   0.0, 1.0,     -1.0, 0.0, 0.0,
+                    -1.0, -1.0, -1.0,  0.0, 0.0,     -1.0, 0.0, 0.0,
+                    -1.0, 1.0, -1.0,   1.0, 0.0,     -1.0, 0.0, 0.0,
+
+                    // Right
+                    1.0, 1.0, 1.0,    1.0, 1.0,      1.0, 0.0, 0.0,
+                    1.0, -1.0, 1.0,   0.0, 1.0,      1.0, 0.0, 0.0,
+                    1.0, -1.0, -1.0,  0.0, 0.0,      1.0, 0.0, 0.0,
+                    1.0, 1.0, -1.0,   1.0, 0.0,      1.0, 0.0, 0.0,
+
+                    // Front
+                    1.0, 1.0, 1.0,    1.0, 0.0,      0.0, 0.0, 1.0,
+                    1.0, -1.0, 1.0,   1.0, 0.0,      0.0, 0.0, 1.0,
+                    -1.0, -1.0, 1.0,  0.0, 0.0,      0.0, 0.0, 1.0,
+                    -1.0, 1.0, 1.0,   0.0, 0.0,      0.0, 0.0, 1.0,
+
+                    // Back
+                    1.0, 1.0, -1.0,    1.0, 1.0,     0.0, 0.0, -1.0,
+                    1.0, -1.0, -1.0,   1.0, 0.0,     0.0, 0.0, -1.0,
+                    -1.0, -1.0, -1.0,  0.0, 0.0,     0.0, 0.0, -1.0,
+                    -1.0, 1.0, -1.0,   0.0, 1.0,     0.0, 0.0, -1.0,
+
+                    // Bottom
+                    -1.0, -1.0, -1.0,   0.0, 0.0,    0.0, -1.0, 0.0,
+                    -1.0, -1.0, 1.0,    0.0, 1.0,    0.0, -1.0, 0.0,
+                    1.0, -1.0, 1.0,     1.0, 1.0,    0.0, -1.0, 0.0,
+                    1.0, -1.0, -1.0,    1.0, 0.0,    0.0, -1.0, 0.0,
+                ];
+
+            let boxIndices =
+            	[
+            		// Top
+            		0, 1, 2,
+            		0, 2, 3,
+
+            		// Left
+            		5, 4, 6,
+            		6, 4, 7,
+
+            		// Right
+            		8, 9, 10,
+            		8, 10, 11,
+
+            		// Front
+            		13, 12, 14,
+            		15, 14, 12,
+
+            		// Back
+            		16, 17, 18,
+            		16, 18, 19,
+
+            		// Bottom
+            		21, 20, 22,
+            		22, 20, 23
+            	];
+
+            const boxVertexBufferObject = gl.createBuffer()
+            gl.bindBuffer(gl.ARRAY_BUFFER, boxVertexBufferObject)
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(boxVertices), gl.STATIC_DRAW)
+
+            if (render_to_texture) {
+                const screenboxVertexBufferObject = gl.createBuffer()
+                gl.bindBuffer(gl.ARRAY_BUFFER, screenboxVertexBufferObject)
+                gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(screenboxVertices), gl.STATIC_DRAW)
+            }
+
+            const boxIndexBufferObject = gl.createBuffer()
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, boxIndexBufferObject)
+            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(boxIndices), gl.STATIC_DRAW)
+
+            let positionAttribLocation = gl.getAttribLocation(program, 'vertPosition')
+            let texCoordAttribLocation = gl.getAttribLocation(program, 'texCoord')
+            let normalAttribLocation = gl.getAttribLocation(program, 'vertNormal')
+
+            gl.vertexAttribPointer(
+                positionAttribLocation,
+                3,
+                gl.FLOAT,
+                gl.FALSE,
+                8 * Float32Array.BYTES_PER_ELEMENT,
+                0
+            )
+            gl.enableVertexAttribArray(positionAttribLocation)
+
+            gl.vertexAttribPointer(
+                texCoordAttribLocation,
+                3,
+                gl.FLOAT,
+                gl.FALSE,
+                8 * Float32Array.BYTES_PER_ELEMENT,
+                3 * Float32Array.BYTES_PER_ELEMENT,
+            )
+            gl.enableVertexAttribArray(texCoordAttribLocation)
+
+            gl.vertexAttribPointer(
+                normalAttribLocation,
+                3,
+                gl.FLOAT,
+                gl.TRUE,
+                8 * Float32Array.BYTES_PER_ELEMENT,
+                5 * Float32Array.BYTES_PER_ELEMENT,
+            )
+            gl.enableVertexAttribArray(normalAttribLocation)
+
+
+            const ck_faces_texture = gl.createTexture()
+            gl.bindTexture(gl.TEXTURE_2D, ck_faces_texture)
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, document.getElementById('faces-image'))
+            gl.bindTexture(gl.TEXTURE_2D, null)
+
+            const target_texture_width = 1024
+            const target_texture_height = 1024
+
+            const cube_target_texture = gl.createTexture()
+            gl.bindTexture(gl.TEXTURE_2D, cube_target_texture)
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, target_texture_width, target_texture_height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null)
+            gl.bindTexture(gl.TEXTURE_2D, null)
+
+            const frame_buffer = gl.createFramebuffer()
+            gl.bindFramebuffer(gl.FRAMEBUFFER, frame_buffer)
+
+            const attachment_point = gl.COLOR_ATTACHMENT0;
+            gl.framebufferTexture2D(gl.FRAMEBUFFER, attachment_point, gl.TEXTURE_2D, cube_target_texture, 0)
+
+
+
+
+            gl.useProgram(program)
+
+            const matWorldUniformLocation = gl.getUniformLocation(program, 'mWorld')
+            const matViewUniformLocation = gl.getUniformLocation(program, 'mView')
+            const matProjUniformLocation = gl.getUniformLocation(program, 'mProj')
+
+            let worldMatrix = new Float32Array(16)
+            let viewMatrix = new Float32Array(16)
+            let projMatrix = new Float32Array(16)
+
+            mat4.identity(worldMatrix)
+            mat4.lookAt(viewMatrix, [0, 0, -8], [0, 0, 0], [0, 1, 0])
+//            mat4.perspective(projMatrix, glMatrix.toRadian(45), canvas.width / canvas.height, 0.1, 1000.0)
+
+            gl.uniformMatrix4fv(matWorldUniformLocation, gl.FALSE, worldMatrix)
+            gl.uniformMatrix4fv(matViewUniformLocation, gl.FALSE, viewMatrix)
+
+
+            let xRotationMatrix = new Float32Array(16)
+            let yRotationMatrix = new Float32Array(16)
+            let zRotationMatrix = new Float32Array(16)
+            let tempMatrix = new Float32Array(16)
+            const identityMatrix = new Float32Array(16)
+            mat4.identity(identityMatrix)
+
+            // Main Render Loop
+            let angle = 0
+            let loop = function() {
+                angle = performance.now() / 2000 / 6 * 2 * Math.PI
+                mat4.rotate(xRotationMatrix, identityMatrix, angle, [1, 0, 0])
+                mat4.rotate(yRotationMatrix, identityMatrix, angle, [0, 1, 0])
+                mat4.rotate(zRotationMatrix, identityMatrix, angle, [0, 1, 1])
+                mat4.mul(tempMatrix, xRotationMatrix, yRotationMatrix)
+                mat4.mul(worldMatrix, tempMatrix, zRotationMatrix)
+                gl.uniformMatrix4fv(matWorldUniformLocation, gl.FALSE, worldMatrix)
+
+                mat4.perspective(projMatrix, glMatrix.toRadian(45), canvas.width / canvas.height, 0.1, 1000.0)
+                gl.uniformMatrix4fv(matProjUniformLocation, gl.FALSE, projMatrix)
+
+                // Render to texture
+                if (render_to_texture) {
+                    gl.bindFramebuffer(gl.FRAMEBUFFER, frame_buffer)
+                    gl.bindTexture(gl.TEXTURE_2D, ck_faces_texture)
+                    //gl.bindBuffer(gl.ARRAY_BUFFER, boxVertexBufferObject)
+                    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(boxVertices), gl.STATIC_DRAW)
+                    gl.viewport(0, 0, target_texture_width, target_texture_height)
+
+                    gl.clearColor(0.95, 0.95, 0.95, 1.0)
+                    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+
+                    gl.drawElements(gl.TRIANGLES, boxIndices.length, gl.UNSIGNED_SHORT, 0)
+                }
+
+                // Render to screen
+                gl.viewport(0, 0, canvas.width, canvas.height)
+                gl.bindFramebuffer(gl.FRAMEBUFFER, null)
+
+                if (render_to_texture) {
+                    gl.bindTexture(gl.TEXTURE_2D, cube_target_texture)
+                    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(screenboxVertices), gl.STATIC_DRAW)
+                } else {
+                    gl.bindTexture(gl.TEXTURE_2D, ck_faces_texture)
+                    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(boxVertices), gl.STATIC_DRAW)
+                }
+
+                gl.clearColor(0.95, 0.95, 0.95, 1.0)
+                gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+
+                gl.drawElements(gl.TRIANGLES, boxIndices.length, gl.UNSIGNED_SHORT, 0)
+
+                requestAnimationFrame(loop)
+            }
+            requestAnimationFrame(loop)
+        }
+    </script>
+{% endblock content %}
