@@ -35,17 +35,20 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.sites',
     'django_extensions',
+
     'pages',
     'articles',
     'profiles',
     'api',
-    'rest_framework',
-    'rest_framework.authtoken',
-    'rest_auth',
+
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
+    'google_analytics',
+    'rest_framework',
+    'rest_framework.authtoken',
+    'rest_auth',
     'rest_auth.registration',
     'rest_framework_swagger',
 ]
@@ -66,6 +69,10 @@ AUTHENTICATION_BACKENDS = (
     # `allauth` specific authentication methods, such as login by e-mail
     "allauth.account.auth_backends.AuthenticationBackend",
 )
+
+GOOGLE_ANALYTICS = {
+    'google_analytics_id': 'UA-108163989-1',
+}
 
 ROOT_URLCONF = 'TT.urls'
 

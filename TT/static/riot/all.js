@@ -172,9 +172,10 @@ riot.tag2('comment-section', '<div class="ui container"> <form class="ui form co
                 .modal('show')
         })
 });
-riot.tag2('perlin', '<canvas id="tutorial"></canvas>', 'perlin canvas,[data-is="perlin"] canvas{ width: 100%; height: 100%; display: block; }', '', function(opts) {
+riot.tag2('perlin', '<canvas if="{!!opts.border_radius}" id="perlin-3d-canvas" riot-style="border-radius: {opts.border_radius}px;"></canvas> <canvas if="{!opts.border_radius}" id="perlin-3d-canvas"></canvas>', 'perlin canvas,[data-is="perlin"] canvas{ width: 100%; height: 100%; display: block; }', '', function(opts) {
+        var self = this
 
-        this.on('mount', function(){
+        self.on('mount', function(){
             const white = 0xFFFFFF;
             const green_blue = 0x063a44;
             const dark_gray = 0x222222;
@@ -183,7 +184,12 @@ riot.tag2('perlin', '<canvas id="tutorial"></canvas>', 'perlin canvas,[data-is="
             const camera_width = 2
             const camera_height = 2
 
-            const canvas = document.querySelector('#tutorial')
+            let mesh_color = light_gray
+            if (!!self.opts.mesh_color) {
+                mesh_color = self.opts.mesh_color
+            }
+
+            const canvas = document.querySelector('#perlin-3d-canvas')
             const renderer = new THREE.WebGLRenderer({canvas})
             const scene = new THREE.Scene()
             const camera = new THREE.OrthographicCamera( camera_width / - 2, camera_width / 2, camera_height / 2, camera_height / - 2, -1000, 1000 );
@@ -197,7 +203,11 @@ riot.tag2('perlin', '<canvas id="tutorial"></canvas>', 'perlin canvas,[data-is="
 			lights[ 1 ].position.set( 100, 200, 100 );
 			lights[ 2 ].position.set( - 100, - 200, - 100 );
 
-            scene.background = new THREE.Color(white)
+            if (!!self.opts.background_color) {
+                scene.background = new THREE.Color(self.opts.background_color)
+            } else {
+                scene.background = new THREE.Color(white)
+            }
 
             let max_pixel_ratio = 4
             let min_pixel_ratio = 2
@@ -216,11 +226,11 @@ riot.tag2('perlin', '<canvas id="tutorial"></canvas>', 'perlin canvas,[data-is="
             const w_res = w * res
             const h_res = h * res
             const plane_geo = new THREE.PlaneGeometry(w, h, w_res, h_res)
-            const teal = new THREE.MeshStandardMaterial({
-                color: light_gray,
+            const mesh_material = new THREE.MeshStandardMaterial({
+                color: mesh_color,
                 wireframe: true,
             })
-            const plane = new THREE.Mesh(plane_geo, teal)
+            const plane = new THREE.Mesh(plane_geo, mesh_material)
 
             const perlin = new Perlin(3, 1, 1)
 

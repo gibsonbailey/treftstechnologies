@@ -72,7 +72,7 @@ First, I'll discuss the original 2-dimensional Perlin noise. This can easily be 
 noise. Next, 3-dimensional noise will be implemented as a modification to the algorithm for 2-dimensional noise.
 
 Throughout this tutorial, we'll be developing a JavaScript class that can be used to generate Perlin noise. The 
-completed code can be found on [Github here].
+completed code can be found on [Github here][github_perlin_code].
 
 ### Initialize Vector Field
 
@@ -183,6 +183,7 @@ a \cdot b = (2 \cdot -2) + (1 \cdot 4) = 0
     <canvas id="a-c-vector-graph" class="large-article-canvas"></canvas>
 </div>
 <a name="perlin-dot-product"></a>
+
 \\[
 a \cdot c = (2 \cdot 1) + (1 \cdot 1) = 3
 \\]
@@ -307,7 +308,9 @@ of functions called _smoothstep_ or _fade_ functions, characterized by their smo
 Ken Perlin chose a _smoothstep_ function \\(f(x) = 6x^5 - 15x^4 + 10x^3\\) (plotted below) of which both the first and second derivatives are 
 zero at \\(x=0\\) and \\(x=1\\).
 
-# Graph of SmootherStep Function
+<div class="article-canvas-container static-canvas">
+    <canvas id="smootherstep-graph" class="large-article-canvas"></canvas>
+</div>
 
 ```
     fade = (x) => {
@@ -345,10 +348,90 @@ At this point, the whole `perlin2D` function is ready to be assembled.
     }
 ```
 
+We reference `this.grid.data`, because it has been set as an attribute of the class. This is not shown in the code here,
+but can be found in the [complete code][github_perlin_code] on Github.
+
 <div class="centered-ellipsis">...</div>
 
 # 3 Dimensions
 
+In order to implement 3-dimensional Perlin Noise, two functions from our 2-dimensional implementation must be 
+modified, `create_gradient_grid2D` and `perlin2D`. The 3-dimensional versions of these functions are very similar.
+
+In three dimensions, each cell is a cube with eight vertices. That means that there are eight dot products that must
+be calculated and interpolated between. This is reflected below in the `perlin3d` code.
+
+``` 
+    perlin3D = (x, y, z) => {
+        let x_node = Math.floor(x)
+        let y_node = Math.floor(y)
+        let z_node = Math.floor(z)
+        let dx = x - x_node
+        let dy = y - y_node
+        let dz = z - z_node
+
+        let lll = this.dot_product([dx, dy, dz], this.grid.data[this.mod(y_node, this.grid.rows)][this.mod(x_node, this.grid.cols)][this.mod(z_node, this.grid.layers)])
+        let llu = this.dot_product([dx, dy, (dz - 1)], this.grid.data[this.mod(y_node, this.grid.rows)][this.mod(x_node, this.grid.cols)][this.mod(z_node + 1, this.grid.layers)])
+        let lul = this.dot_product([dx, (dy - 1), dz], this.grid.data[this.mod((y_node + 1), this.grid.rows)][this.mod(x_node, this.grid.cols)][this.mod(z_node, this.grid.layers)])
+        let luu = this.dot_product([dx, (dy - 1), (dz - 1)], this.grid.data[this.mod((y_node + 1), this.grid.rows)][this.mod(x_node, this.grid.cols)][this.mod(z_node + 1, this.grid.layers)])
+        let ull = this.dot_product([(dx - 1), dy, dz], this.grid.data[this.mod(y_node, this.grid.rows)][this.mod((x_node + 1), this.grid.cols)][this.mod(z_node, this.grid.layers)])
+        let ulu = this.dot_product([(dx - 1), dy, (dz - 1)], this.grid.data[this.mod(y_node, this.grid.rows)][this.mod((x_node + 1), this.grid.cols)][this.mod(z_node + 1, this.grid.layers)])
+        let uul = this.dot_product([(dx - 1), (dy - 1), dz], this.grid.data[this.mod((y_node + 1), this.grid.rows)][this.mod((x_node + 1), this.grid.cols)][this.mod(z_node, this.grid.layers)])
+        let uuu = this.dot_product([(dx - 1), (dy - 1), (dz - 1)], this.grid.data[this.mod((y_node + 1), this.grid.rows)][this.mod((x_node + 1), this.grid.cols)][this.mod(z_node + 1, this.grid.layers)])
+
+        let UL = this.smerp(lul, lll, dy)
+        let LL = this.smerp(uul, ull, dy)
+        let UU = this.smerp(luu, llu, dy)
+        let LU = this.smerp(uuu, ulu, dy)
+
+        let L = this.smerp(LL, UL, dx)
+        let U = this.smerp(LU, UU, dx)
+
+        return this.smerp(U, L, dz)
+    }
+```
+
+The 3-dimensional grid generation function has another loop to add another dimension. The randomly generated vectors are 
+3-dimensional as well.
+
+``` 
+    create_gradient_grid3D = (n, m, k) => {
+        let dimension = 3
+
+        let grid = {
+            rows: n,
+            cols: m,
+            layers: k,
+            data: [],
+        }
+
+        for(let i = 0; i < n; i++) {
+            let row = []
+            for(let j = 0; j < m; j++) {
+                let col = []
+                for(let q = 0; q < k; q++) {
+                    col.push(this.create_random_vector(dimension))
+                }
+                row.push(col)
+            }
+            grid.data.push(row)
+        }
+
+        return grid
+    }
+```
+
+</br></br>
+The 3-dimensional implementation is being used to create the following live graphic.
+
+<div class="article-canvas-container">
+    <perlin background_color="#000000" mesh_color="{TT_blue}" border_radius="4" class="huge-article-canvas"></perlin>
+</div>
+
+# Conclusion
+
+Now the power of creating organic noise is in your hands. Leave a comment below with your thoughts on this article. If you decide to create something 
+using Perlin noise, please feel free to share your project with me. 
 
 <script>
 let tic_spacing = 65
@@ -487,20 +570,18 @@ function draw_cursor_arrow(ob, c_x, c_y) {
     let x_base = Math.floor(cursor_pos.x)
     let y_base = Math.floor(cursor_pos.y) + 1
     
-    let arrow_start = ob.grid_to_canvas_space(x_base, y_base)
     let label = {}
     label.text = '(' + (cursor_pos.x - x_base).toFixed(2) + ', ' + (y_base - cursor_pos.y).toFixed(2) + ')'
     label.color = 'white'
+    
+    ob.draw_arrow(x_base + 1, y_base - 1, cursor_pos.x - x_base - 1, y_base - cursor_pos.y - 1, 3, TT_brown)
+    ob.draw_arrow(x_base + 1, y_base, cursor_pos.x - x_base - 1, y_base - cursor_pos.y, 3, TT_brown)
+    ob.draw_arrow(x_base, y_base - 1, cursor_pos.x - x_base, y_base - cursor_pos.y - 1, 3, TT_brown)
     ob.draw_arrow(x_base, y_base, cursor_pos.x - x_base, y_base - cursor_pos.y, 3, TT_light_blue, label)
 }
 
 
 vec_dot.set_extra_draw_func(draw_cursor_arrow)
-
-//for (let i = 0; i < vec_field_array.length; i++) {
-//    vec_field_array[i].color = TT_blue
-//}
-
 vec_dot.set_arrows(vec_field_array)
 
 
@@ -582,6 +663,33 @@ let c = {
 ab_vec.set_arrows([a, b])
 ac_vec.set_arrows([a, c])
 
+/*******************************/
+/* Smootherstep Function Graph */
+/*******************************/
+
+smootherstep_canvas = document.getElementById('smootherstep-graph') 
+smootherstep = new TTplot(smootherstep_canvas, 350, background_color)
+
+axis_config = {
+    origin: {
+        x: 100,
+        y: 100,
+    },
+    line_width: 2,
+    color: 'rgb(225, 227, 230)',
+    grid: false,
+}
+
+smootherstep.axes(axis_config)
+let smootherstep_function_options = {
+    line_width: 2,
+    color: 'white',
+    res: 1,
+}
+
+smootherstep.set_func( (x) => (6 * Math.pow(x, 5)) + (-15 * Math.pow(x, 4)) + (10 * Math.pow(x, 3)), smootherstep_function_options)
+
+riot.mount('*')
 </script>
 
-[Github here]: https://github.com/gibsonbailey/treftstechnologies/blob/master/TT/static/js/utility/perlin.js 
+[github_perlin_code]: https://github.com/gibsonbailey/treftstechnologies/blob/master/TT/static/js/utility/perlin.js 
