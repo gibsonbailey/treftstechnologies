@@ -1,0 +1,318 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block extra_head %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gl-matrix/2.8.1/gl-matrix-min.js"></script>
+    <script src="{% static 'js/utility/webgl.js' %}"></script>
+{% endblock extra_head %}
+
+{% block content %}
+
+    <canvas id="triangle"></canvas>
+    <img id="faces-image" src="{% static 'ck_faces/Faces-Texture.png'%}" style="display: none;" alt="Run collectstatic">
+
+    <style>
+        #triangle {
+            display: block;
+            margin: 200px auto 200px auto;
+        }
+    </style>
+
+    <script>
+        const screen_fragment_shader_url = '{% static 'shaders/waves/screen.glsl' %}'
+        const converter_fragment_shader_url = '{% static 'shaders/waves/float_converter.glsl' %}'
+        const simulation_fragment_shader_url = '{% static 'shaders/waves/simulation.glsl' %}'
+        const vertex_shader_url = '{% static 'shaders/waves/vertex.glsl' %}'
+        let screen_frag_shader_text = null
+        let converter_frag_shader_text = null
+        let simulation_frag_shader_text = null
+        let vert_shader_text = null
+
+
+        const dpr = window.devicePixelRatio
+
+        const TARGET_TEXTURE_QUANTITY = 3
+        const TARGET_FRAMEBUFFER_QUANTITY = 3
+        const height = 800 * dpr
+        const width = 1000 * dpr
+
+        let gl = null
+
+        let display = {}
+        let converter = {}
+        let simulation = {}
+        let position_buffer = null
+        let target_textures = []
+        let frame_buffers = []
+        let ck_faces_texture = null
+
+        const increment_buffer_index = function (index) {
+            return (index + 1) % TARGET_FRAMEBUFFER_QUANTITY
+        }
+
+        $(document).ready( function () {
+            let promise_vertex = $.get(vertex_shader_url)
+            let promise_screen_fragment = $.get(screen_fragment_shader_url)
+            let promise_converter_fragment = $.get(converter_fragment_shader_url)
+            let promise_simulation_fragment = $.get(simulation_fragment_shader_url)
+
+            Promise.all([promise_vertex, promise_screen_fragment, promise_converter_fragment, promise_simulation_fragment]).then(function (d) {
+                vert_shader_text = d[0]
+                screen_frag_shader_text = d[1]
+                converter_frag_shader_text = d[2]
+                simulation_frag_shader_text = d[3]
+                setup()
+            })
+
+            const setup = function () {
+                let canvas = document.getElementById('triangle')
+
+                canvas.height = height
+                canvas.width = width
+                canvas.style.height = height / dpr + 'px'
+                canvas.style.width = width / dpr + 'px'
+
+                gl = canvas.getContext('webgl')
+                const ext1 = gl.getExtension('OES_texture_float')
+                const ext2 = gl.getExtension('OES_texture_float_linear')
+
+                if (!gl) {
+                    gl = canvas.getContext('experimental-webgl')
+                }
+                if (!gl) {
+                    alert('WebGL not supported.')
+                }
+
+                gl.enable(gl.CULL_FACE)
+                gl.cullFace(gl.BACK)
+                gl.frontFace(gl.CCW)
+                gl.enable(gl.DEPTH_TEST)
+
+                simulation.program = build_program(gl, vert_shader_text, simulation_frag_shader_text, 'simulation_program')
+                converter.program = build_program(gl, vert_shader_text, converter_frag_shader_text, 'converter_program')
+                display.program = build_program(gl, vert_shader_text, screen_frag_shader_text, 'screen program')
+
+                initialize_buffers()
+            }
+
+            const initialize_buffers = function () {
+
+                /////////////////
+                // Vertex Data //
+                /////////////////
+
+                let vertices = [
+                    // X, Y      U, V
+                    -1.0, -1.0,  0.0, 0.0,
+                    1.0, -1.0,   1.0, 0,
+                    -1.0, 1.0,   0.0, 1.0,
+                    -1.0,  1.0,  0.0, 1.0,
+                    1.0, -1.0,   1.0, 0.0,
+                    1.0, 1.0,    1.0, 1.0,
+                ]
+
+                display.attribute_locations = {}
+                display.uniform_locations = {}
+                converter.attribute_locations = {}
+                converter.uniform_locations = {}
+                simulation.attribute_locations = {}
+                simulation.uniform_locations = {}
+
+                display.attribute_locations.tex_coord = gl.getAttribLocation(display.program, 'a_tex_coord')
+                display.attribute_locations.position = gl.getAttribLocation(display.program, 'a_position')
+                display.uniform_locations.texture = gl.getUniformLocation(display.program, 'input_texture')
+
+                converter.attribute_locations.tex_coord = gl.getAttribLocation(converter.program, 'a_tex_coord')
+                converter.attribute_locations.position = gl.getAttribLocation(converter.program, 'a_position')
+                converter.uniform_locations.texture = gl.getUniformLocation(converter.program, 'input_texture')
+
+                simulation.attribute_locations.tex_coord = gl.getAttribLocation(simulation.program, 'a_tex_coord')
+                simulation.attribute_locations.position = gl.getAttribLocation(simulation.program, 'a_position')
+                simulation.uniform_locations.current_mesh_texture = gl.getUniformLocation(simulation.program, 'current_mesh')
+                simulation.uniform_locations.previous_mesh_texture = gl.getUniformLocation(simulation.program, 'previous_mesh')
+                simulation.uniform_locations.resolution = gl.getUniformLocation(simulation.program, 'resolution')
+
+                position_buffer = gl.createBuffer()
+                gl.bindBuffer(gl.ARRAY_BUFFER, position_buffer)
+                gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW)
+
+
+                ck_faces_texture = gl.createTexture()
+                gl.bindTexture(gl.TEXTURE_2D, ck_faces_texture)
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, document.getElementById('faces-image'))
+
+
+                for(let i = 0; i < TARGET_TEXTURE_QUANTITY; i++) {
+                    // create render targets
+                    let targetTexture = gl.createTexture();
+                    gl.bindTexture(gl.TEXTURE_2D, targetTexture);
+
+                    // define size and format of level 0
+                    const level = 0;
+                    const internalFormat = gl.RGBA;
+                    const border = 0;
+                    const format = gl.RGBA;
+                    const type = gl.UNSIGNED_BYTE;
+                    const data = null;
+                    gl.texImage2D(gl.TEXTURE_2D, level, internalFormat,
+                        width, height, border,
+                        format, type, data);
+
+                    // set the filtering so we don't need mips
+                    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+                    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+                    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+                    target_textures.push(targetTexture)
+                }
+
+                for(let i = 0; i < TARGET_FRAMEBUFFER_QUANTITY; i++) {
+                    const fb = gl.createFramebuffer()
+                    gl.bindFramebuffer(gl.FRAMEBUFFER, fb)
+                    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, target_textures[i], 0)
+                    frame_buffers.push(fb)
+                }
+
+                load_texture()
+                run(2)
+            }
+
+            const run = function (buffer_index) {
+                let next_index = run_simulation(buffer_index)
+                draw_screen(next_index)
+                requestAnimationFrame(function () {
+                    run(next_index)
+                })
+            }
+
+            const load_texture = function () {
+                gl.activeTexture(gl.TEXTURE0)
+                gl.bindTexture(gl.TEXTURE_2D, ck_faces_texture)
+                gl.activeTexture(gl.TEXTURE1)
+                gl.bindTexture(gl.TEXTURE_2D, ck_faces_texture)
+                convert_to_float(frame_buffers[1])
+                draw_screen(1)
+            }
+
+            const run_simulation = function (buffer_index) {
+                const previous_index = increment_buffer_index(buffer_index)
+                const current_index = increment_buffer_index(previous_index)
+
+                gl.activeTexture(gl.TEXTURE0)
+                gl.bindTexture(gl.TEXTURE_2D, target_textures[previous_index])
+                gl.activeTexture(gl.TEXTURE1)
+                gl.bindTexture(gl.TEXTURE_2D, target_textures[current_index])
+
+                draw_sim_to_framebuffer(frame_buffers[buffer_index])
+                return previous_index
+            }
+
+            const convert_to_float = function (frame_buffer) {
+                gl.bindFramebuffer(gl.FRAMEBUFFER, frame_buffer)
+                gl.viewport(0, 0, width, height)
+                gl.useProgram(converter.program)
+                gl.uniform1i(converter.uniform_locations.texture, 0);
+                gl.uniform1f(converter.uniform_locations.blur_width, 0.01);
+
+                gl.enableVertexAttribArray(converter.attribute_locations.position)
+                gl.bindBuffer(gl.ARRAY_BUFFER, position_buffer)
+                gl.vertexAttribPointer(
+                    converter.attribute_locations.position,
+                    2,
+                    gl.FLOAT,
+                    false,
+                    4 * Float32Array.BYTES_PER_ELEMENT,
+                    0
+                )
+
+                gl.enableVertexAttribArray(converter.attribute_locations.tex_coord)
+                gl.bindBuffer(gl.ARRAY_BUFFER, position_buffer)
+                gl.vertexAttribPointer(
+                    converter.attribute_locations.tex_coord,
+                    2,
+                    gl.FLOAT,
+                    false,
+                    4 * Float32Array.BYTES_PER_ELEMENT,
+                    2 * Float32Array.BYTES_PER_ELEMENT,
+                )
+
+                gl.drawArrays(gl.TRIANGLES, 0, 6)
+            }
+
+            const draw_screen = function (texture_index) {
+                gl.bindFramebuffer(gl.FRAMEBUFFER, null)
+                gl.clearColor(0, 0, 0, 0.9)
+                gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+                gl.viewport(0, 0, width, height)
+                gl.useProgram(display.program)
+                gl.uniform1i(display.uniform_locations.texture, 0);
+
+                gl.bindTexture(gl.TEXTURE_2D, target_textures[texture_index])
+
+                gl.enableVertexAttribArray(display.attribute_locations.position)
+                gl.bindBuffer(gl.ARRAY_BUFFER, position_buffer)
+                gl.vertexAttribPointer(
+                    display.attribute_locations.position,
+                    2,
+                    gl.FLOAT,
+                    false,
+                    4 * Float32Array.BYTES_PER_ELEMENT,
+                    0
+                )
+
+                gl.enableVertexAttribArray(display.attribute_locations.tex_coord)
+                gl.bindBuffer(gl.ARRAY_BUFFER, position_buffer)
+                gl.vertexAttribPointer(
+                    display.attribute_locations.tex_coord,
+                    2,
+                    gl.FLOAT,
+                    false,
+                    4 * Float32Array.BYTES_PER_ELEMENT,
+                    2 * Float32Array.BYTES_PER_ELEMENT,
+                )
+
+                gl.drawArrays(gl.TRIANGLES, 0, 6)
+            }
+
+            const draw_sim_to_framebuffer = function (frame_buffer) {
+                gl.bindFramebuffer(gl.FRAMEBUFFER, frame_buffer)
+                gl.viewport(0, 0, width, height)
+                gl.useProgram(simulation.program)
+                gl.uniform1i(simulation.uniform_locations.previous_mesh_texture, 0);
+                gl.uniform1i(simulation.uniform_locations.current_mesh_texture, 1);
+                gl.uniform2fv(simulation.uniform_locations.resolution, [1.0 / width, 1.0 / height]);
+
+                gl.enableVertexAttribArray(simulation.attribute_locations.position)
+                gl.bindBuffer(gl.ARRAY_BUFFER, position_buffer)
+                gl.vertexAttribPointer(
+                    simulation.attribute_locations.position,
+                    2,
+                    gl.FLOAT,
+                    false,
+                    4 * Float32Array.BYTES_PER_ELEMENT,
+                    0
+                )
+
+                gl.enableVertexAttribArray(simulation.attribute_locations.tex_coord)
+                gl.bindBuffer(gl.ARRAY_BUFFER, position_buffer)
+                gl.vertexAttribPointer(
+                    simulation.attribute_locations.tex_coord,
+                    2,
+                    gl.FLOAT,
+                    false,
+                    4 * Float32Array.BYTES_PER_ELEMENT,
+                    2 * Float32Array.BYTES_PER_ELEMENT,
+                )
+
+                gl.drawArrays(gl.TRIANGLES, 0, 6)
+            }
+        })
+
+
+    </script>
+{% endblock content %}

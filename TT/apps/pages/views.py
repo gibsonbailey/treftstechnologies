@@ -16,5 +16,5 @@ class HomePageView(TemplateView):
         return data
 
 class WebGLCubeView(TemplateView):
-    template_name = 'pages/webgl_cube.html'
+    template_name = 'pages/waves.html'
 
