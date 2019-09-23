@@ -10,7 +10,8 @@
 {% block content %}
 
     <canvas id="triangle"></canvas>
-    <img id="faces-image" src="{% static 'ck_faces/Faces-Texture.png'%}" style="display: none;" alt="Run collectstatic">
+    <img id="faces-image" src="{% static 'ck_faces/gaussian16.png'%}" style="display: none;" alt="Run collectstatic">
+{#    <img id="faces-image" src="{% static 'ck_faces/Faces-Texture.png'%}" style="display: none;" alt="Run collectstatic">#}
 
     <style>
         #triangle {
@@ -24,9 +25,13 @@
         const converter_fragment_shader_url = '{% static 'shaders/waves/float_converter.glsl' %}'
         const simulation_fragment_shader_url = '{% static 'shaders/waves/simulation.glsl' %}'
         const vertex_shader_url = '{% static 'shaders/waves/vertex.glsl' %}'
+        const overlay_vertex_shader_url = '{% static 'shaders/waves/overlay_gaussian_vertex.glsl' %}'
+        const overlay_fragment_shader_url = '{% static 'shaders/waves/overlay_gaussian.glsl' %}'
         let screen_frag_shader_text = null
         let converter_frag_shader_text = null
         let simulation_frag_shader_text = null
+        let overlay_vert_shader_text = null
+        let overlay_frag_shader_text = null
         let vert_shader_text = null
 
 
@@ -34,48 +39,88 @@
 
         const TARGET_TEXTURE_QUANTITY = 3
         const TARGET_FRAMEBUFFER_QUANTITY = 3
-        const height = 800 * dpr
-        const width = 1000 * dpr
+        const height = 100 * dpr
+        const width = 100 * dpr
 
         let gl = null
 
         let display = {}
         let converter = {}
         let simulation = {}
+        let overlay = {}
         let position_buffer = null
         let target_textures = []
         let frame_buffers = []
-        let ck_faces_texture = null
+        let gaussian_texture = null
+
+        let mouse_state = {
+            over_canvas: false,
+            clicked: false,
+            x: 0.0,
+            y: 0.0,
+        }
 
         const increment_buffer_index = function (index) {
             return (index + 1) % TARGET_FRAMEBUFFER_QUANTITY
         }
+
 
         $(document).ready( function () {
             let promise_vertex = $.get(vertex_shader_url)
             let promise_screen_fragment = $.get(screen_fragment_shader_url)
             let promise_converter_fragment = $.get(converter_fragment_shader_url)
             let promise_simulation_fragment = $.get(simulation_fragment_shader_url)
+            let promise_overlay_vertex = $.get(overlay_vertex_shader_url)
+            let promise_overlay_fragment = $.get(overlay_fragment_shader_url)
 
-            Promise.all([promise_vertex, promise_screen_fragment, promise_converter_fragment, promise_simulation_fragment]).then(function (d) {
+            Promise.all([promise_vertex, promise_screen_fragment, promise_converter_fragment, promise_simulation_fragment, promise_overlay_vertex, promise_overlay_fragment]).then(function (d) {
                 vert_shader_text = d[0]
                 screen_frag_shader_text = d[1]
                 converter_frag_shader_text = d[2]
                 simulation_frag_shader_text = d[3]
+                overlay_vert_shader_text = d[4]
+                overlay_frag_shader_text = d[5]
                 setup()
             })
 
             const setup = function () {
                 let canvas = document.getElementById('triangle')
 
+
+
+
                 canvas.height = height
                 canvas.width = width
-                canvas.style.height = height / dpr + 'px'
-                canvas.style.width = width / dpr + 'px'
+                let scale = 7.0
+                const adjusted_height = scale * height / dpr
+                const adjusted_width = scale * width / dpr
+                canvas.style.height = adjusted_height + 'px'
+                canvas.style.width = adjusted_width + 'px'
+
+                $(canvas).mouseenter(function (e) {
+                    mouse_state.over_canvas = true
+                })
+
+                $(canvas).mouseout(function (e) {
+                    mouse_state.over_canvas = false
+                })
+
+                $(canvas).mousedown(function (e) {
+                    mouse_state.clicked = true
+                })
+
+                $(document).mouseup(function (e) {
+                    mouse_state.clicked = false
+                })
+
+                $(canvas).mousemove(function (e) {
+                    let x_position = ((e.pageX - $(canvas).offset().left) / adjusted_width)
+                    let y_position = 1.0 - ((e.pageY - $(canvas).offset().top) / adjusted_height)
+                    mouse_state.x = x_position
+                    mouse_state.y = y_position
+                })
 
                 gl = canvas.getContext('webgl')
-                const ext1 = gl.getExtension('OES_texture_float')
-                const ext2 = gl.getExtension('OES_texture_float_linear')
 
                 if (!gl) {
                     gl = canvas.getContext('experimental-webgl')
@@ -87,11 +132,11 @@
                 gl.enable(gl.CULL_FACE)
                 gl.cullFace(gl.BACK)
                 gl.frontFace(gl.CCW)
-                gl.enable(gl.DEPTH_TEST)
 
-                simulation.program = build_program(gl, vert_shader_text, simulation_frag_shader_text, 'simulation_program')
-                converter.program = build_program(gl, vert_shader_text, converter_frag_shader_text, 'converter_program')
-                display.program = build_program(gl, vert_shader_text, screen_frag_shader_text, 'screen program')
+                simulation.program = build_program(gl, vert_shader_text, simulation_frag_shader_text, 'simulation')
+                converter.program = build_program(gl, vert_shader_text, converter_frag_shader_text, 'converter')
+                overlay.program = build_program(gl, overlay_vert_shader_text, overlay_frag_shader_text, 'overlay')
+                display.program = build_program(gl, vert_shader_text, screen_frag_shader_text, 'screen')
 
                 initialize_buffers()
             }
@@ -116,6 +161,8 @@
                 display.uniform_locations = {}
                 converter.attribute_locations = {}
                 converter.uniform_locations = {}
+                overlay.attribute_locations = {}
+                overlay.uniform_locations = {}
                 simulation.attribute_locations = {}
                 simulation.uniform_locations = {}
 
@@ -127,19 +174,27 @@
                 converter.attribute_locations.position = gl.getAttribLocation(converter.program, 'a_position')
                 converter.uniform_locations.texture = gl.getUniformLocation(converter.program, 'input_texture')
 
+                overlay.attribute_locations.tex_coord = gl.getAttribLocation(overlay.program, 'a_tex_coord')
+                overlay.attribute_locations.position = gl.getAttribLocation(overlay.program, 'a_position')
+                overlay.uniform_locations.background_texture = gl.getUniformLocation(overlay.program, 'background')
+                overlay.uniform_locations.gaussian_texture = gl.getUniformLocation(overlay.program, 'gaussian')
+                overlay.uniform_locations.tex_coord_center_matrix = gl.getUniformLocation(overlay.program, 'u_tex_coord_center_matrix')
+
                 simulation.attribute_locations.tex_coord = gl.getAttribLocation(simulation.program, 'a_tex_coord')
                 simulation.attribute_locations.position = gl.getAttribLocation(simulation.program, 'a_position')
                 simulation.uniform_locations.current_mesh_texture = gl.getUniformLocation(simulation.program, 'current_mesh')
                 simulation.uniform_locations.previous_mesh_texture = gl.getUniformLocation(simulation.program, 'previous_mesh')
                 simulation.uniform_locations.resolution = gl.getUniformLocation(simulation.program, 'resolution')
+                simulation.uniform_locations.c = gl.getUniformLocation(simulation.program, 'c')
+                simulation.uniform_locations.dt = gl.getUniformLocation(simulation.program, 'dt')
 
                 position_buffer = gl.createBuffer()
                 gl.bindBuffer(gl.ARRAY_BUFFER, position_buffer)
                 gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW)
 
 
-                ck_faces_texture = gl.createTexture()
-                gl.bindTexture(gl.TEXTURE_2D, ck_faces_texture)
+                gaussian_texture = gl.createTexture()
+                gl.bindTexture(gl.TEXTURE_2D, gaussian_texture)
                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
@@ -183,6 +238,10 @@
             }
 
             const run = function (buffer_index) {
+                if (mouse_state.clicked && mouse_state.over_canvas) {
+                    overlay_gaussian_on_center(mouse_state.x, mouse_state.y, buffer_index)
+                    buffer_index = increment_buffer_index(buffer_index)
+                }
                 let next_index = run_simulation(buffer_index)
                 draw_screen(next_index)
                 requestAnimationFrame(function () {
@@ -192,11 +251,78 @@
 
             const load_texture = function () {
                 gl.activeTexture(gl.TEXTURE0)
-                gl.bindTexture(gl.TEXTURE_2D, ck_faces_texture)
-                gl.activeTexture(gl.TEXTURE1)
-                gl.bindTexture(gl.TEXTURE_2D, ck_faces_texture)
+                gl.bindTexture(gl.TEXTURE_2D, gaussian_texture)
                 convert_to_float(frame_buffers[1])
+                convert_to_float(frame_buffers[0])
                 draw_screen(1)
+            }
+
+            const overlay_gaussian_on_center = function (x, y, buffer_index) {
+                let previous_index = increment_buffer_index(buffer_index)
+                let current_index = increment_buffer_index(previous_index)
+
+                gl.activeTexture(gl.TEXTURE0)
+                gl.bindTexture(gl.TEXTURE_2D, gaussian_texture)
+                gl.activeTexture(gl.TEXTURE1)
+                gl.bindTexture(gl.TEXTURE_2D, target_textures[current_index])
+
+                run_overlay(frame_buffers[buffer_index], x, y)
+                gl.activeTexture(gl.TEXTURE1)
+                gl.bindTexture(gl.TEXTURE_2D, target_textures[previous_index])
+
+                run_overlay(frame_buffers[current_index], x, y)
+//                run_overlay(frame_buffers[2], x, y)
+//                draw_screen(1)
+            }
+
+            const run_overlay = function (frame_buffer, c_x, c_y) {
+                gl.bindFramebuffer(gl.FRAMEBUFFER, frame_buffer)
+                gl.viewport(0, 0, width, height)
+                gl.useProgram(overlay.program)
+
+                // calculate scale and translation for x and y
+                const s_x = 0.05
+                const s_y = 0.05
+                const t_x = (-c_x/s_x) + 0.5
+                const t_y = (-c_y/s_y) + 0.5
+
+
+
+                gl.uniformMatrix3fv(overlay.uniform_locations.tex_coord_center_matrix, false, [
+                    (1.0/s_x), 0.0, 0.0,
+                    0.0, (1.0/s_y), 0.0,
+                    t_x, t_y, 1.0,
+
+ //                   4.0, 0.0, 0.0,
+ //                   0.0, 4.0, 0.0,
+ //                   0.25, 0.0, 1.0,
+                ])
+                gl.uniform1i(overlay.uniform_locations.gaussian_texture, 0);
+                gl.uniform1i(overlay.uniform_locations.background_texture, 1);
+
+                gl.enableVertexAttribArray(overlay.attribute_locations.position)
+                gl.bindBuffer(gl.ARRAY_BUFFER, position_buffer)
+                gl.vertexAttribPointer(
+                    overlay.attribute_locations.position,
+                    2,
+                    gl.FLOAT,
+                    false,
+                    4 * Float32Array.BYTES_PER_ELEMENT,
+                    0
+                )
+
+                gl.enableVertexAttribArray(overlay.attribute_locations.tex_coord)
+                gl.bindBuffer(gl.ARRAY_BUFFER, position_buffer)
+                gl.vertexAttribPointer(
+                    overlay.attribute_locations.tex_coord,
+                    2,
+                    gl.FLOAT,
+                    false,
+                    4 * Float32Array.BYTES_PER_ELEMENT,
+                    2 * Float32Array.BYTES_PER_ELEMENT,
+                )
+
+                gl.drawArrays(gl.TRIANGLES, 0, 6)
             }
 
             const run_simulation = function (buffer_index) {
@@ -285,6 +411,8 @@
                 gl.useProgram(simulation.program)
                 gl.uniform1i(simulation.uniform_locations.previous_mesh_texture, 0);
                 gl.uniform1i(simulation.uniform_locations.current_mesh_texture, 1);
+                gl.uniform1f(simulation.uniform_locations.c, 0.5);
+                gl.uniform1f(simulation.uniform_locations.dt, 0.003);
                 gl.uniform2fv(simulation.uniform_locations.resolution, [1.0 / width, 1.0 / height]);
 
                 gl.enableVertexAttribArray(simulation.attribute_locations.position)

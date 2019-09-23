@@ -3,6 +3,8 @@ precision mediump float;
 uniform sampler2D previous_mesh;
 uniform sampler2D current_mesh;
 uniform vec2 resolution;
+uniform float c;
+uniform float dt;
 
 varying vec2 v_tex_coord;
 
@@ -11,14 +13,8 @@ float decode(vec4 rgba);
 
 void main()
 {
-    float c = 0.5;
     float dx = resolution.x;
     float dy = resolution.y;
-    float dt = 0.0001;
-    float scale = 1.0;
-    dx *= scale;
-    dy *= scale;
-    dt *= scale;
 
     float u = decode(texture2D(current_mesh, v_tex_coord));
     float u_x_high = decode(texture2D(current_mesh, v_tex_coord + vec2(dx, 0)));
