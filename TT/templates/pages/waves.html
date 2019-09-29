@@ -34,13 +34,18 @@
         let overlay_frag_shader_text = null
         let vert_shader_text = null
 
-
         const dpr = window.devicePixelRatio
 
         const TARGET_TEXTURE_QUANTITY = 3
         const TARGET_FRAMEBUFFER_QUANTITY = 3
-        const height = 100 * dpr
-        const width = 100 * dpr
+        const height = 300 * dpr
+        const width = 300 * dpr
+        let scale = 4.0
+        const dt = 0.003
+        const wave_speed = 0.3
+        const x_res = 1.0 / width
+        const y_res = 1.0 / height
+        console.info('c^2:', (1 / (dt * dt)) * (1.0 / (1 / (x_res * x_res)) + (1 / (y_res * y_res))))
 
         let gl = null
 
@@ -86,12 +91,8 @@
             const setup = function () {
                 let canvas = document.getElementById('triangle')
 
-
-
-
                 canvas.height = height
                 canvas.width = width
-                let scale = 7.0
                 const adjusted_height = scale * height / dpr
                 const adjusted_width = scale * width / dpr
                 canvas.style.height = adjusted_height + 'px'
@@ -263,16 +264,14 @@
 
                 gl.activeTexture(gl.TEXTURE0)
                 gl.bindTexture(gl.TEXTURE_2D, gaussian_texture)
+
                 gl.activeTexture(gl.TEXTURE1)
                 gl.bindTexture(gl.TEXTURE_2D, target_textures[current_index])
-
                 run_overlay(frame_buffers[buffer_index], x, y)
+
                 gl.activeTexture(gl.TEXTURE1)
                 gl.bindTexture(gl.TEXTURE_2D, target_textures[previous_index])
-
                 run_overlay(frame_buffers[current_index], x, y)
-//                run_overlay(frame_buffers[2], x, y)
-//                draw_screen(1)
             }
 
             const run_overlay = function (frame_buffer, c_x, c_y) {
@@ -286,16 +285,10 @@
                 const t_x = (-c_x/s_x) + 0.5
                 const t_y = (-c_y/s_y) + 0.5
 
-
-
                 gl.uniformMatrix3fv(overlay.uniform_locations.tex_coord_center_matrix, false, [
                     (1.0/s_x), 0.0, 0.0,
                     0.0, (1.0/s_y), 0.0,
                     t_x, t_y, 1.0,
-
- //                   4.0, 0.0, 0.0,
- //                   0.0, 4.0, 0.0,
- //                   0.25, 0.0, 1.0,
                 ])
                 gl.uniform1i(overlay.uniform_locations.gaussian_texture, 0);
                 gl.uniform1i(overlay.uniform_locations.background_texture, 1);
@@ -411,9 +404,9 @@
                 gl.useProgram(simulation.program)
                 gl.uniform1i(simulation.uniform_locations.previous_mesh_texture, 0);
                 gl.uniform1i(simulation.uniform_locations.current_mesh_texture, 1);
-                gl.uniform1f(simulation.uniform_locations.c, 0.5);
-                gl.uniform1f(simulation.uniform_locations.dt, 0.003);
-                gl.uniform2fv(simulation.uniform_locations.resolution, [1.0 / width, 1.0 / height]);
+                gl.uniform1f(simulation.uniform_locations.c, wave_speed);
+                gl.uniform1f(simulation.uniform_locations.dt, dt);
+                gl.uniform2fv(simulation.uniform_locations.resolution, [x_res, y_res]);
 
                 gl.enableVertexAttribArray(simulation.attribute_locations.position)
                 gl.bindBuffer(gl.ARRAY_BUFFER, position_buffer)
