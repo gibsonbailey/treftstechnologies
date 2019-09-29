@@ -2,6 +2,7 @@ precision mediump float;
 
 uniform sampler2D previous_mesh;
 uniform sampler2D current_mesh;
+uniform sampler2D boundary_conditions;
 uniform vec2 resolution;
 uniform float c;
 uniform float dt;
@@ -25,8 +26,9 @@ void main()
 
     float u_xx = (u_x_high - (2.0 * u) + u_x_low)/ (dx * dx);
     float u_yy = (u_y_high - (2.0 * u) + u_y_low)/ (dy * dy);
-    float u_next = (c * c * dt * dt * (u_xx + u_yy)) + (2.0 * u) - u_previous;
+    float u_next = ((c * c * dt * dt * (u_xx + u_yy)) + (2.0 * u) - u_previous - 0.125) * (1.0 - decode(texture2D(boundary_conditions, v_tex_coord))) + 0.125;
 
+//    u_next = decode(texture2D(boundary_conditions, v_tex_coord));
     gl_FragColor = encode(u_next);
 }
 

@@ -10,8 +10,12 @@
 {% block content %}
 
     <canvas id="triangle"></canvas>
-    <img id="faces-image" src="{% static 'ck_faces/gaussian16.png'%}" style="display: none;" alt="Run collectstatic">
+    <img id="gaussian-image" src="{% static 'ck_faces/gaussian16.png'%}" style="display: none;" alt="Run collectstatic">
+    <img id="circle-image" src="{% static 'ck_faces/circle.jpg'%}" style="display: none;" alt="Run collectstatic">
 {#    <img id="faces-image" src="{% static 'ck_faces/Faces-Texture.png'%}" style="display: none;" alt="Run collectstatic">#}
+
+    <button class="ui basic blue button" id="wall-button">Draw Walls</button>
+    <button class="ui basic blue button" id="reset-button">Reset</button>
 
     <style>
         #triangle {
@@ -21,13 +25,19 @@
     </style>
 
     <script>
-        const screen_fragment_shader_url = '{% static 'shaders/waves/screen.glsl' %}'
+        const display_fragment_shader_url = '{% static 'shaders/waves/screen.glsl' %}'
+        const copy_fragment_shader_url = '{% static 'shaders/waves/copy.glsl' %}'
+        const zero_fragment_shader_url = '{% static 'shaders/waves/zero.glsl' %}'
+        const zero_vert_shader_url = '{% static 'shaders/waves/zero_vertex.glsl' %}'
         const converter_fragment_shader_url = '{% static 'shaders/waves/float_converter.glsl' %}'
         const simulation_fragment_shader_url = '{% static 'shaders/waves/simulation.glsl' %}'
         const vertex_shader_url = '{% static 'shaders/waves/vertex.glsl' %}'
-        const overlay_vertex_shader_url = '{% static 'shaders/waves/overlay_gaussian_vertex.glsl' %}'
-        const overlay_fragment_shader_url = '{% static 'shaders/waves/overlay_gaussian.glsl' %}'
-        let screen_frag_shader_text = null
+        const overlay_vertex_shader_url = '{% static 'shaders/waves/overlay_brush_vertex.glsl' %}'
+        const overlay_fragment_shader_url = '{% static 'shaders/waves/overlay_brush.glsl' %}'
+        let display_frag_shader_text = null
+        let copy_frag_shader_text = null
+        let zero_frag_shader_text = null
+        let zero_vert_shader_text = null
         let converter_frag_shader_text = null
         let simulation_frag_shader_text = null
         let overlay_vert_shader_text = null
@@ -42,6 +52,7 @@
         const width = 300 * dpr
         let scale = 4.0
         const dt = 0.003
+        //const dt = 0.0003
         const wave_speed = 0.3
         const x_res = 1.0 / width
         const y_res = 1.0 / height
@@ -50,6 +61,8 @@
         let gl = null
 
         let display = {}
+        let copy = {}
+        let zero = {}
         let converter = {}
         let simulation = {}
         let overlay = {}
@@ -57,6 +70,9 @@
         let target_textures = []
         let frame_buffers = []
         let gaussian_texture = null
+        let circle_texture = null
+        let boundary_conditions = {}
+        let boundary_conditions_copy = {}
 
         let mouse_state = {
             over_canvas: false,
@@ -64,27 +80,74 @@
             x: 0.0,
             y: 0.0,
         }
+        let draw_walls = false
+        let zero_textures = false
 
         const increment_buffer_index = function (index) {
             return (index + 1) % TARGET_FRAMEBUFFER_QUANTITY
         }
 
+        const create_target_texture = function () {
+            // create render targets
+            let targetTexture = gl.createTexture();
+            gl.bindTexture(gl.TEXTURE_2D, targetTexture);
+
+            // define size and format of level 0
+            const level = 0;
+            const internalFormat = gl.RGBA;
+            const border = 0;
+            const format = gl.RGBA;
+            const type = gl.UNSIGNED_BYTE;
+            const data = null;
+            gl.texImage2D(gl.TEXTURE_2D, level, internalFormat,
+                width, height, border,
+                format, type, data);
+
+            // set the filtering so we don't need mips
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+            return targetTexture
+        }
+
+        const create_target_framebuffer = function (texture) {
+            const fb = gl.createFramebuffer()
+            gl.bindFramebuffer(gl.FRAMEBUFFER, fb)
+            gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0)
+            return fb
+        }
+
+        $('#wall-button').click(function (e) {
+            draw_walls = !draw_walls
+        })
+
+        $('#reset-button').click(function (e) {
+            zero_textures = true
+        })
+
 
         $(document).ready( function () {
             let promise_vertex = $.get(vertex_shader_url)
-            let promise_screen_fragment = $.get(screen_fragment_shader_url)
+            let promise_display_fragment = $.get(display_fragment_shader_url)
+            let promise_copy_fragment = $.get(copy_fragment_shader_url)
+            let promise_zero_fragment = $.get(zero_fragment_shader_url)
+            let promise_zero_vertex = $.get(zero_vert_shader_url)
             let promise_converter_fragment = $.get(converter_fragment_shader_url)
             let promise_simulation_fragment = $.get(simulation_fragment_shader_url)
             let promise_overlay_vertex = $.get(overlay_vertex_shader_url)
             let promise_overlay_fragment = $.get(overlay_fragment_shader_url)
 
-            Promise.all([promise_vertex, promise_screen_fragment, promise_converter_fragment, promise_simulation_fragment, promise_overlay_vertex, promise_overlay_fragment]).then(function (d) {
-                vert_shader_text = d[0]
-                screen_frag_shader_text = d[1]
-                converter_frag_shader_text = d[2]
-                simulation_frag_shader_text = d[3]
-                overlay_vert_shader_text = d[4]
-                overlay_frag_shader_text = d[5]
+            Promise.all([promise_vertex, promise_display_fragment, promise_copy_fragment, promise_zero_fragment, promise_zero_vertex, promise_converter_fragment, promise_simulation_fragment, promise_overlay_vertex, promise_overlay_fragment]).then(function (d) {
+                vert_shader_text = d.shift()
+                display_frag_shader_text = d.shift()
+                copy_frag_shader_text = d.shift()
+                zero_frag_shader_text = d.shift()
+                zero_vert_shader_text = d.shift()
+                converter_frag_shader_text = d.shift()
+                simulation_frag_shader_text = d.shift()
+                overlay_vert_shader_text = d.shift()
+                overlay_frag_shader_text = d.shift()
                 setup()
             })
 
@@ -135,9 +198,11 @@
                 gl.frontFace(gl.CCW)
 
                 simulation.program = build_program(gl, vert_shader_text, simulation_frag_shader_text, 'simulation')
+                copy.program = build_program(gl, vert_shader_text, copy_frag_shader_text, 'copy')
+                zero.program = build_program(gl, zero_vert_shader_text, zero_frag_shader_text, 'zero')
                 converter.program = build_program(gl, vert_shader_text, converter_frag_shader_text, 'converter')
                 overlay.program = build_program(gl, overlay_vert_shader_text, overlay_frag_shader_text, 'overlay')
-                display.program = build_program(gl, vert_shader_text, screen_frag_shader_text, 'screen')
+                display.program = build_program(gl, vert_shader_text, display_frag_shader_text, 'screen')
 
                 initialize_buffers()
             }
@@ -160,6 +225,10 @@
 
                 display.attribute_locations = {}
                 display.uniform_locations = {}
+                zero.attribute_locations = {}
+                zero.uniform_locations = {}
+                copy.attribute_locations = {}
+                copy.uniform_locations = {}
                 converter.attribute_locations = {}
                 converter.uniform_locations = {}
                 overlay.attribute_locations = {}
@@ -169,7 +238,14 @@
 
                 display.attribute_locations.tex_coord = gl.getAttribLocation(display.program, 'a_tex_coord')
                 display.attribute_locations.position = gl.getAttribLocation(display.program, 'a_position')
-                display.uniform_locations.texture = gl.getUniformLocation(display.program, 'input_texture')
+                display.uniform_locations.simulation_texture = gl.getUniformLocation(display.program, 'simulation_texture')
+                display.uniform_locations.boundary_conditions_texture = gl.getUniformLocation(display.program, 'boundary_conditions')
+
+                zero.attribute_locations.position = gl.getAttribLocation(zero.program, 'a_position')
+
+                copy.attribute_locations.tex_coord = gl.getAttribLocation(copy.program, 'a_tex_coord')
+                copy.attribute_locations.position = gl.getAttribLocation(copy.program, 'a_position')
+                copy.uniform_locations.texture = gl.getUniformLocation(copy.program, 'input_texture')
 
                 converter.attribute_locations.tex_coord = gl.getAttribLocation(converter.program, 'a_tex_coord')
                 converter.attribute_locations.position = gl.getAttribLocation(converter.program, 'a_position')
@@ -178,13 +254,14 @@
                 overlay.attribute_locations.tex_coord = gl.getAttribLocation(overlay.program, 'a_tex_coord')
                 overlay.attribute_locations.position = gl.getAttribLocation(overlay.program, 'a_position')
                 overlay.uniform_locations.background_texture = gl.getUniformLocation(overlay.program, 'background')
-                overlay.uniform_locations.gaussian_texture = gl.getUniformLocation(overlay.program, 'gaussian')
+                overlay.uniform_locations.brush_texture = gl.getUniformLocation(overlay.program, 'brush')
                 overlay.uniform_locations.tex_coord_center_matrix = gl.getUniformLocation(overlay.program, 'u_tex_coord_center_matrix')
 
                 simulation.attribute_locations.tex_coord = gl.getAttribLocation(simulation.program, 'a_tex_coord')
                 simulation.attribute_locations.position = gl.getAttribLocation(simulation.program, 'a_position')
                 simulation.uniform_locations.current_mesh_texture = gl.getUniformLocation(simulation.program, 'current_mesh')
                 simulation.uniform_locations.previous_mesh_texture = gl.getUniformLocation(simulation.program, 'previous_mesh')
+                simulation.uniform_locations.boundary_conditions_texture = gl.getUniformLocation(simulation.program, 'boundary_conditions')
                 simulation.uniform_locations.resolution = gl.getUniformLocation(simulation.program, 'resolution')
                 simulation.uniform_locations.c = gl.getUniformLocation(simulation.program, 'c')
                 simulation.uniform_locations.dt = gl.getUniformLocation(simulation.program, 'dt')
@@ -200,48 +277,47 @@
                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
-                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, document.getElementById('faces-image'))
+                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, document.getElementById('gaussian-image'))
+
+                circle_texture = gl.createTexture()
+                gl.bindTexture(gl.TEXTURE_2D, circle_texture)
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, document.getElementById('circle-image'))
 
 
                 for(let i = 0; i < TARGET_TEXTURE_QUANTITY; i++) {
-                    // create render targets
-                    let targetTexture = gl.createTexture();
-                    gl.bindTexture(gl.TEXTURE_2D, targetTexture);
-
-                    // define size and format of level 0
-                    const level = 0;
-                    const internalFormat = gl.RGBA;
-                    const border = 0;
-                    const format = gl.RGBA;
-                    const type = gl.UNSIGNED_BYTE;
-                    const data = null;
-                    gl.texImage2D(gl.TEXTURE_2D, level, internalFormat,
-                        width, height, border,
-                        format, type, data);
-
-                    // set the filtering so we don't need mips
-                    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-                    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-                    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-
-                    target_textures.push(targetTexture)
+                    target_textures.push(create_target_texture())
+                    frame_buffers.push(create_target_framebuffer(target_textures[i]))
                 }
 
-                for(let i = 0; i < TARGET_FRAMEBUFFER_QUANTITY; i++) {
-                    const fb = gl.createFramebuffer()
-                    gl.bindFramebuffer(gl.FRAMEBUFFER, fb)
-                    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, target_textures[i], 0)
-                    frame_buffers.push(fb)
-                }
+                boundary_conditions.texture = create_target_texture()
+                boundary_conditions_copy.texture = create_target_texture()
+                boundary_conditions.frame_buffer = create_target_framebuffer(boundary_conditions.texture)
+                boundary_conditions_copy.frame_buffer = create_target_framebuffer(boundary_conditions_copy.texture)
 
-                load_texture()
+                initialize_textures()
                 run(2)
             }
 
             const run = function (buffer_index) {
-                if (mouse_state.clicked && mouse_state.over_canvas) {
-                    overlay_gaussian_on_center(mouse_state.x, mouse_state.y, buffer_index)
-                    buffer_index = increment_buffer_index(buffer_index)
+                if(zero_textures) {
+                    zero_texture(frame_buffers[0])
+                    zero_texture(frame_buffers[1])
+                    zero_texture(frame_buffers[2])
+                    zero_texture(boundary_conditions.frame_buffer)
+                    zero_textures = false
+                } else {
+                    if (mouse_state.clicked && mouse_state.over_canvas) {
+                        if (draw_walls) {
+                            overlay_circle_on_center(mouse_state.x, mouse_state.y, buffer_index)
+                        } else {
+                            overlay_gaussian_on_center(mouse_state.x, mouse_state.y, buffer_index)
+                            buffer_index = increment_buffer_index(buffer_index)
+                        }
+                    }
                 }
                 let next_index = run_simulation(buffer_index)
                 draw_screen(next_index)
@@ -250,7 +326,17 @@
                 })
             }
 
-            const load_texture = function () {
+            const initialize_textures = function () {
+                gl.activeTexture(gl.TEXTURE0)
+                gl.bindTexture(gl.TEXTURE_2D, circle_texture)
+                convert_to_float(frame_buffers[1])
+
+                gl.activeTexture(gl.TEXTURE0)
+                gl.bindTexture(gl.TEXTURE_2D, target_textures[1])
+                copy_texture(boundary_conditions.frame_buffer)
+                zero_texture(boundary_conditions.frame_buffer)
+
+
                 gl.activeTexture(gl.TEXTURE0)
                 gl.bindTexture(gl.TEXTURE_2D, gaussian_texture)
                 convert_to_float(frame_buffers[1])
@@ -267,21 +353,34 @@
 
                 gl.activeTexture(gl.TEXTURE1)
                 gl.bindTexture(gl.TEXTURE_2D, target_textures[current_index])
-                run_overlay(frame_buffers[buffer_index], x, y)
+                run_overlay(frame_buffers[buffer_index], x, y, 0.05)
 
                 gl.activeTexture(gl.TEXTURE1)
                 gl.bindTexture(gl.TEXTURE_2D, target_textures[previous_index])
-                run_overlay(frame_buffers[current_index], x, y)
+                run_overlay(frame_buffers[current_index], x, y, 0.05)
             }
 
-            const run_overlay = function (frame_buffer, c_x, c_y) {
+            const overlay_circle_on_center = function (x, y, buffer_index) {
+                gl.activeTexture(gl.TEXTURE0)
+                gl.bindTexture(gl.TEXTURE_2D, boundary_conditions.texture)
+                copy_texture(boundary_conditions_copy.frame_buffer)
+
+                gl.activeTexture(gl.TEXTURE0)
+                gl.bindTexture(gl.TEXTURE_2D, circle_texture)
+
+                gl.activeTexture(gl.TEXTURE1)
+                gl.bindTexture(gl.TEXTURE_2D, boundary_conditions_copy.texture)
+                run_overlay(boundary_conditions.frame_buffer, x, y, 0.03)
+            }
+
+            const run_overlay = function (frame_buffer, c_x, c_y, scale) {
                 gl.bindFramebuffer(gl.FRAMEBUFFER, frame_buffer)
                 gl.viewport(0, 0, width, height)
                 gl.useProgram(overlay.program)
 
                 // calculate scale and translation for x and y
-                const s_x = 0.05
-                const s_y = 0.05
+                const s_x = scale
+                const s_y = scale
                 const t_x = (-c_x/s_x) + 0.5
                 const t_y = (-c_y/s_y) + 0.5
 
@@ -290,7 +389,7 @@
                     0.0, (1.0/s_y), 0.0,
                     t_x, t_y, 1.0,
                 ])
-                gl.uniform1i(overlay.uniform_locations.gaussian_texture, 0);
+                gl.uniform1i(overlay.uniform_locations.brush_texture, 0);
                 gl.uniform1i(overlay.uniform_locations.background_texture, 1);
 
                 gl.enableVertexAttribArray(overlay.attribute_locations.position)
@@ -326,6 +425,8 @@
                 gl.bindTexture(gl.TEXTURE_2D, target_textures[previous_index])
                 gl.activeTexture(gl.TEXTURE1)
                 gl.bindTexture(gl.TEXTURE_2D, target_textures[current_index])
+                gl.activeTexture(gl.TEXTURE2)
+                gl.bindTexture(gl.TEXTURE_2D, boundary_conditions.texture)
 
                 draw_sim_to_framebuffer(frame_buffers[buffer_index])
                 return previous_index
@@ -363,15 +464,75 @@
                 gl.drawArrays(gl.TRIANGLES, 0, 6)
             }
 
+            const zero_texture = function (framebuffer) {
+                gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer)
+                gl.clearColor(0, 0, 0, 0.9)
+                gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+                gl.viewport(0, 0, width, height)
+                gl.useProgram(zero.program)
+
+                gl.enableVertexAttribArray(zero.attribute_locations.position)
+                gl.bindBuffer(gl.ARRAY_BUFFER, position_buffer)
+                gl.vertexAttribPointer(
+                    zero.attribute_locations.position,
+                    2,
+                    gl.FLOAT,
+                    false,
+                    4 * Float32Array.BYTES_PER_ELEMENT,
+                    0
+                )
+
+                gl.drawArrays(gl.TRIANGLES, 0, 6)
+            }
+
+            const copy_texture = function (framebuffer) {
+                gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer)
+                gl.clearColor(0, 0, 0, 0.9)
+                gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+                gl.viewport(0, 0, width, height)
+                gl.useProgram(copy.program)
+                gl.uniform1i(copy.uniform_locations.texture, 0);
+
+                gl.enableVertexAttribArray(copy.attribute_locations.position)
+                gl.bindBuffer(gl.ARRAY_BUFFER, position_buffer)
+                gl.vertexAttribPointer(
+                    copy.attribute_locations.position,
+                    2,
+                    gl.FLOAT,
+                    false,
+                    4 * Float32Array.BYTES_PER_ELEMENT,
+                    0
+                )
+
+                gl.enableVertexAttribArray(copy.attribute_locations.tex_coord)
+                gl.bindBuffer(gl.ARRAY_BUFFER, position_buffer)
+                gl.vertexAttribPointer(
+                    copy.attribute_locations.tex_coord,
+                    2,
+                    gl.FLOAT,
+                    false,
+                    4 * Float32Array.BYTES_PER_ELEMENT,
+                    2 * Float32Array.BYTES_PER_ELEMENT,
+                )
+
+                gl.drawArrays(gl.TRIANGLES, 0, 6)
+            }
+
+
             const draw_screen = function (texture_index) {
                 gl.bindFramebuffer(gl.FRAMEBUFFER, null)
                 gl.clearColor(0, 0, 0, 0.9)
                 gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
                 gl.viewport(0, 0, width, height)
                 gl.useProgram(display.program)
-                gl.uniform1i(display.uniform_locations.texture, 0);
+                gl.uniform1i(display.uniform_locations.simulation_texture, 0);
+                gl.uniform1i(display.uniform_locations.boundary_conditions_texture, 1);
 
+                gl.activeTexture(gl.TEXTURE0)
                 gl.bindTexture(gl.TEXTURE_2D, target_textures[texture_index])
+
+                gl.activeTexture(gl.TEXTURE1)
+                gl.bindTexture(gl.TEXTURE_2D, boundary_conditions.texture)
 
                 gl.enableVertexAttribArray(display.attribute_locations.position)
                 gl.bindBuffer(gl.ARRAY_BUFFER, position_buffer)
@@ -404,6 +565,7 @@
                 gl.useProgram(simulation.program)
                 gl.uniform1i(simulation.uniform_locations.previous_mesh_texture, 0);
                 gl.uniform1i(simulation.uniform_locations.current_mesh_texture, 1);
+                gl.uniform1i(simulation.uniform_locations.boundary_conditions_texture, 2);
                 gl.uniform1f(simulation.uniform_locations.c, wave_speed);
                 gl.uniform1f(simulation.uniform_locations.dt, dt);
                 gl.uniform2fv(simulation.uniform_locations.resolution, [x_res, y_res]);
