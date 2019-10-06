@@ -14,13 +14,20 @@
     <img id="circle-image" src="{% static 'ck_faces/circle.jpg'%}" style="display: none;" alt="Run collectstatic">
 {#    <img id="faces-image" src="{% static 'ck_faces/Faces-Texture.png'%}" style="display: none;" alt="Run collectstatic">#}
 
-    <button class="ui basic blue button" id="wall-button">Draw Walls</button>
-    <button class="ui basic blue button" id="reset-button">Reset</button>
+    <div class="fluid grid" id="control-buttons" style="text-align: center;">
+        <button class="ui basic blue button" id="wall-button">Draw Walls</button>
+        <button class="ui basic blue button" id="wave-button">Draw Waves</button>
+        <button class="ui basic blue button" id="reset-button">Reset</button>
+    </div>
 
     <style>
         #triangle {
             display: block;
-            margin: 200px auto 200px auto;
+            margin: 200px auto 20px auto;
+        }
+
+        #control-buttons {
+            margin-bottom: 100px;
         }
     </style>
 
@@ -48,9 +55,9 @@
 
         const TARGET_TEXTURE_QUANTITY = 3
         const TARGET_FRAMEBUFFER_QUANTITY = 3
-        const height = 300 * dpr
-        const width = 300 * dpr
-        let scale = 4.0
+        const height = 350 * dpr
+        const width = 350 * dpr
+        let scale = 3.0
         const dt = 0.003
         //const dt = 0.0003
         const wave_speed = 0.3
@@ -120,8 +127,18 @@
             return fb
         }
 
+        $('#wave-button').hide()
+
         $('#wall-button').click(function (e) {
-            draw_walls = !draw_walls
+            draw_walls = true
+            $('#wall-button').hide()
+            $('#wave-button').show()
+        })
+
+        $('#wave-button').click(function (e) {
+            draw_walls = false
+            $('#wave-button').hide()
+            $('#wall-button').show()
         })
 
         $('#reset-button').click(function (e) {
