@@ -153,5 +153,5 @@ find an old book when you could just search for the location of the box with a l
 
 
 ## Conclusion
-These are the core commands that Git is built around. Next, interactions between the local repository and remote repositories
-(Github) will be covered.
+These are the core commands that Git is built around. Next, interactions between the local repository and remote repositories,
+e.g. Github, will be covered.
