@@ -1,3 +1,7 @@
+</br>
+</br>
+</br>
+
 ## What is Git?
 
 Git is a form of version control software written by the creator of Linux, Linux Torvalds. It is used
@@ -12,6 +16,9 @@ The basic workflow of the developer using Git is as follows:
 
 This is a simplified set of actions, but they are the most common and important ones.
 
+</br>
+</br>
+</br>
 
 ## Installation
 
@@ -37,6 +44,10 @@ Then use homebrew to intall Git.
 brew install git
 ```
 
+</br>
+</br>
+</br>
+
 ## Post-Installation
 
 Run the following command in your terminal to confirm your installation.
@@ -47,6 +58,10 @@ git --version
 
 If the terminal responds with `git version x.x.x`, then you have succeeded!
 
+</br>
+</br>
+</br>
+
 ## Git Setup
 
 Git will stamp your identity on every contribution, or `commit` in Git lingo. Give Git your name
@@ -56,6 +71,10 @@ and email by setting the name and email variables with the following commands.
 git config --global user.name "Sir Lemmiwinks"
 git config --global user.email "lemmiwinks@gmail.com"
 ```
+
+</br>
+</br>
+</br>
 
 ## Conclusion
 
