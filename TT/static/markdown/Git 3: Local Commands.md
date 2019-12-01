@@ -64,6 +64,7 @@ git checkout <commit hash or branch name>
 # Git Stash
 Sometimes, 
 
+
 ```
 git stash [pop]
 ```
