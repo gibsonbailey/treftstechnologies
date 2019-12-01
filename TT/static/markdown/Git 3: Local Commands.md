@@ -1,9 +1,8 @@
-
-<div style="height: 10em;"></div>
-
 When working on substantial projects, especially with others, Git becomes an indispensable tool.
 It takes some practice and research to grow into a proficient user. These are some of the most common
 commands that I use everyday when working on different features in a project.
+
+<div style="height: 6em;"></div>
 
 # Git Branch
 Git stores its history in a graph structure. This may be intimidating for Git users, but it simply means
@@ -17,7 +16,6 @@ This command creates a branch.
 ```
 git branch <branch name>
 ```
-
 
 <div style="height: 10em;"></div>
 
@@ -62,8 +60,12 @@ git checkout <commit hash or branch name>
 <div style="height: 10em;"></div>
 
 # Git Stash
-Sometimes, 
+Sometimes, you have changes in the working directory, that you temporarily would like to store. For example, if you were working on a
+branch but weren't ready to commit the changes, and you needed to immediately checkout another branch and make a change, you could:
 
+1. Stash your changes with `git stash`, giving you a clean working directory and index. 
+2. Checkout the other branch to make a change and commit it. 
+3. Then return back to the original branch (`git checkout`) and pop the stashed changes with `git stash pop`. 
 
 ```
 git stash [pop]
@@ -72,4 +74,5 @@ git stash [pop]
 <div style="height: 10em;"></div>
 
 ## Conclusion
-
+As a developer takes on larger projects, Git can start to require a large portion of the developer's time. Getting to know the commands
+listed above will keep you on track throughout the day, and keep you from struggling with every new change that needs to be crafted.
