@@ -42,12 +42,20 @@
         </div>
 
         {% if next_article %}
-            <a class="ui black button" href="{% url "articles:detail" slug=next_article.slug %}">Next: {{ next_article.title }}</a>
+            <div class="ui centered grid">
+                <div class="five wide column">
+                    <a class="ui fluid large black button" id="next-button" href="{% url "articles:detail" slug=next_article.slug %}">Next -> {{ next_article.title }}</a>
+                </div>
+            </div>
         {% endif %}
 
     </div>
 
     <style>
+        #next-button {
+            margin-bottom: 8em;
+        }
+
         .heading {
             margin-top: 20vh;
             width: 50vw !important;
