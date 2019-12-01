@@ -41,6 +41,10 @@
             <div id="main-content" class="ui content fixed-width"></div>
         </div>
 
+        {% if next_article %}
+            <a class="ui black button" href="{% url "articles:detail" slug=next_article.slug %}">Next: {{ next_article.title }}</a>
+        {% endif %}
+
     </div>
 
     <style>

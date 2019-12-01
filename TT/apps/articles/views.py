@@ -27,8 +27,13 @@ class ArticleDetailView(DetailView):
 
     def get_object(self):
         object = super().get_object()
-        print(object)
+        self.object = object
         if object.published == False and not self.request.user.is_superuser:
             raise Http404()
         return object
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        article = self.object
+        context['next_article'] = Article.objects.filter(publish_date__gt=article.publish_date).order_by('publish_date').first()
+        return context
