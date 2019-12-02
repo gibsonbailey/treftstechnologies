@@ -63,7 +63,7 @@ riot.tag2('comment', '<div class="ui row"> <div class="ui grid comment-heading">
             })
         }
 });
-riot.tag2('comment-section', '<div class="ui container"> <form class="ui form commentform"> <div class="field"> <textarea rows="3" type="text" name="comment" placeholder="Respond with a comment..." ref="comment_textarea"></textarea> </div> </form> <comment class="ui centered grid outer-comment" each="{comm in comments}" cmt="{comm}"></comment> </div>', 'comment-section { min-height: 400px; background: var(--TT-blue); } comment-section .outer-comment,[data-is="comment-section"] .outer-comment{ width: 70% !important; margin-left: auto !important; margin-right: auto !important; } comment-section .commentform,[data-is="comment-section"] .commentform{ width: 70%; margin: 50px auto 50px auto; }', '', function(opts) {
+riot.tag2('comment-section', '<div class="ui container"> <form class="ui form commentform"> <div class="field"> <textarea rows="3" type="text" name="comment" placeholder="Respond with a comment..." ref="comment_textarea"></textarea> </div> </form> <comment class="ui centered grid outer-comment" each="{comm in comments}" cmt="{comm}"></comment> </div>', 'comment-section { min-height: 400px; background: var(--TT-black); } comment-section .outer-comment,[data-is="comment-section"] .outer-comment{ width: 70% !important; margin-left: auto !important; margin-right: auto !important; } comment-section .commentform,[data-is="comment-section"] .commentform{ width: 70%; margin: 50px auto 50px auto; }', '', function(opts) {
         var self = this
 
         function get_comments(scroll) {
