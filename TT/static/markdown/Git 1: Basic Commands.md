@@ -3,11 +3,11 @@
 </br>
 </br>
 
-Let's discuss the conceptual model of Git. There are three discrete compartments that files can reside in: the working
-directory, the staging area, and the repository. 
+Let's discuss the conceptual model of Git, so the following commands make sense. There are three discrete compartments 
+that files can reside in: the working directory, the staging area, and the repository. 
 
 ## The Working Directory
-This is the set of files that resides in the project directory at the current moment. These files can be swapped out 
+This is the browsable set of files that resides in the project directory at the current moment. These files can be swapped out 
 for another set of files if certain Git commands are invoked. For example, Git is used to keep a record of file history
 from the time that the Git repository was initialized. The user can browse the files at any point in the history using the command, 
 
@@ -54,7 +54,7 @@ the project.
 </br>
 
 ## The Repository
-The repository is like a warehouse full of commits. It contains all the contributions made to the project. Git makes it easy
+The repository is like a warehouse full of commits. It contains all the persistent contributions made to the project. Git makes it easy
 to download, change, and share files by packaging them all up into a repository, or repo.
 Run the command:
 
@@ -62,15 +62,16 @@ Run the command:
 git init
 ``` 
 
-in a project directory to activate it as a Git repository. Notice that before the init command is run,
+in a project directory to initialize it as a Git repository. Notice that before the init command is run,
 the `.git` directory does not exist. Use the command:
 
 ```
 ls -la
 ```
 
-to see the file, since it is hidden (prefixed with a `.`).The init command 
-creates this directory which will contain all of the commits created, as well as most of the other data Git needs to run.
+to see the file, since it is hidden (prefixed with `.`).The init command 
+creates the `.git` directory which contains all of the commits created, as well as most of the other data Git needs 
+in order to function.
 
 
 <img class="article-image" src="/static/article_images/repository_warehouse.png">
@@ -81,7 +82,7 @@ creates this directory which will contain all of the commits created, as well as
 </br>
 
 ## Commands
-Git offers a suite of commands that are used to move files from one compartment to another.
+Git offers a suite of commands that are used to move files from one of the conceptual compartments to another.
 
 Using the command,
 
@@ -89,16 +90,23 @@ Using the command,
 git status
 ```
 
-the user can see what is in the staging area, what is not, and what 
-is currently untracked. The command:
+the user can see which files are in the staging area, which are unstaged, and which 
+are untracked. The command:
 
 ```
 git diff
 ```
 
- shows what exactly has changed in the files that haven't been
-staged yet. Use the `j` and `k` keys to scroll down and up respectively in `git diff`. To see the changes made to
-the files that have already been staged, use the command: 
+shows what exactly has changed in the files that haven't been
+staged yet. Technically, this is the difference between the repository and 
+tracked files that have not been added to the staging area yet.
+Use the `j` and `k` keys to scroll down and up respectively in `git diff`. 
+
+</br>
+</br>
+
+To see the changes between staged files and the repository, 
+use the command: 
 
 ```
 git diff --cached
@@ -109,7 +117,7 @@ git diff --cached
 </br>
 
 ### The working directory and the staging area
-Here are two commands that move between staging area and the working directory.
+Here are some commands that move files between the staging area and the working directory.
 
 ```
 git add <file>
@@ -122,13 +130,11 @@ Sometimes all the changes that have been made should be committed. In that case,
 git add .
 ```
 
-To remove files from the staging area, use the command:  
+To unstage a file, use the command:  
 
 ```
 git reset HEAD <file>
 ```
-
-This command will be further explained in a future article.
 
 </br>
 </br>
@@ -145,7 +151,8 @@ git commit -m "<message>"
 Every commit should have a message attached to it, so one can browse the repository later on and understand
 the changes that were made in each commit without actually having to open them up. This is like labeling the boxes in a 
 warehouse. Imagine how difficult and inefficient it would be to search through an entire warehouse full of boxes to 
-find an old book when you could just search for the location of the box with a label of "Old Books".
+find an old book when you could just search for the location of the box with a label of "Old Books". This is why
+commit messages should be descriptive.
 
 </br>
 </br>

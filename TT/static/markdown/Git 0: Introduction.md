@@ -1,3 +1,7 @@
+</br>
+</br>
+</br>
+
 This article series is written to get you up to speed with the Git software. After finishing the series, 
 you'll feel confident using Git to build software of your own.
 
