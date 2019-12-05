@@ -8,7 +8,7 @@ and other Git hosting services.
 
 # Git Clone
 Cloning a repository, in basic terms is just copying a repository. If the source repository is on a different
-machine, it will be downloaded onto the one that instantiated the command. This command instantiates a local
+machine, it will be downloaded onto the one that invoked the command. This command instantiates a local
 repository, just as `git init` does, but populates it with all of the files from the source repository.
 
 ```
@@ -33,11 +33,24 @@ Github is the most prominent Git service company. They run a TON of servers for 
 git remote -v
 ```
 
-Run the command within a Git repository to list all of the remote sources associated with the repo. If this command is
+Run this command within a Git repository to list all of the remote sources associated with the repo. If this command is
 run after a clone, there should already be a source named origin. Git automatically adds this for you when the repo is 
-downloaded through the `git clone` command.
+downloaded and initialized by the `git clone` command.
 
 If the repository was initialized locally, then this list will be empty.
+
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+
+<img class="article-image" src="/static/article_images/Server Rack.png">
+
+</br>
+</br>
+</br>
 
 
 <div style="height: 10em;"></div>
@@ -65,6 +78,19 @@ In the case that the user is the only one working on a set of files, `git pull` 
 git pull <source name> <branch>
 ```
 
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+
+<img class="article-image" src="/static/article_images/git pull.png">
+
+</br>
+</br>
+</br>
+
 <div style="height: 10em;"></div>
 
 # Git Fetch
@@ -85,6 +111,19 @@ since the last synchronization with the remote repository, whether that be a `gi
 ```
 git push <source name> <branch>
 ```
+
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+
+<img class="article-image" src="/static/article_images/git push.png">
+
+</br>
+</br>
+</br>
 
 <div style="height: 10em;"></div>
 
