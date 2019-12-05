@@ -1,14 +1,20 @@
+This article series is written to get you up to speed with the Git software. After finishing the series, 
+you'll feel confident using Git to build software of your own.
+
 </br>
 </br>
 </br>
 
-## What is Git?
+## What actually is Git?
 
-Git is a form of version control software written by the creator of Linux, Linux Torvalds. It is used
-to create repositories of code for engineers to contribute to. It offers a solution to the problem of
-collaboration in software engineering. 
+Git is a form of version control software written by the creator of Linux, Linus Torvalds. It is used
+to create and manage repositories of code for engineers to contribute to. Git was built to be an efficient 
+tool for collaboration. With the power of Git comes a learning curve that is felt by many engineers. This
+series of articles will prepare you with an understanding of the most common commands used daily by 
+developers.
 
-The basic workflow of the developer using Git is as follows: 
+
+The basic workflow of the developer using Git goes as follows: 
 1. Write some code for a project.
 2. Decide which code is suitable for the project-wide repository.
 3. Store the suitable code in the repository.
@@ -22,7 +28,7 @@ This is a simplified set of actions, but they are the most common and important 
 
 ## Installation
 
-In order to get started with Git, one must first install it. 
+In order to get started with Git, one must first install it. Use the command fit for your machine to install it.
 
 ### Linux Ubuntu
 
