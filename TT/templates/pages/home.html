@@ -33,38 +33,143 @@
         </div>
     </div>
 
-    <div class="ui container" id="swt">
+    <div class="ui container section-container" id="topic-container">
+        <div class="ui stackable three column grid">
+            <div class="middle aligned row">
+                <div class="two wide column">
+                </div>
+                <div class="ten wide center aligned column">
+                    <h1 class="ui huge header">
+                        Software engineering services for the web and more.
+                    </h1>
+                </div>
+                <div class="two wide column">
+                </div>
+            </div>
+        </div>
+    </div>
 
-        <div class="ui centered container stackable four column grid" id="icon-container">
+    <div class="ui container section-container" id="projects-container">
+        <div class="ui centered container stackable three column grid">
             <div class="middle aligned row">
                 <div class="four wide column">
-                    <div class="ui small image">
-                        <img id="python-icon" src="{% static 'icons/python.png' %}">
+                    <div class="ui inverted segment">
+                        <div class="content">
+                            <div class="header">
+                                Project 1
+                                <div class="meta">
+                                    January 2, 2019
+                                </div>
+                            </div>
+                            <div class="description">
+                                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Adipisci aut dolor doloremque in odit officia quidem, quod sapiente sequi sit ut velit voluptates voluptatibus! Accusamus autem debitis deleniti dolorem vitae?
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="four wide column">
-                    <div class="ui small image">
-                        <img id='django-icon' src="{% static 'icons/django.png' %}">
+                    <div class="ui inverted card">
+                        <div class="content">
+                            <div class="header">
+                                Project 1
+                                <div class="meta">
+                                    January 2, 2019
+                                </div>
+                            </div>
+                            <div class="description">
+                                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Adipisci aut dolor doloremque in odit officia quidem, quod sapiente sequi sit ut velit voluptates voluptatibus! Accusamus autem debitis deleniti dolorem vitae?
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="four wide column">
-                    <div class="ui small image">
-                        <img id='javascript-icon' src="{% static 'icons/javascript.png' %}">
-                    </div>
-                </div>
-                <div class="four wide column">
-                    <div class="ui small image">
-                        <img id='c++-icon' src="{% static 'icons/c++.png' %}">
+                    <div class="ui card">
+                        <div class="content">
+                            <div class="header">
+                                Project 1
+                                <div class="meta">
+                                    January 2, 2019
+                                </div>
+                            </div>
+                            <div class="description">
+                                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Adipisci aut dolor doloremque in odit officia quidem, quod sapiente sequi sit ut velit voluptates voluptatibus! Accusamus autem debitis deleniti dolorem vitae?
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <div class="ui container section-container" id="swt">
+        <div class="ui centered container stackable four column grid">
+            <div class="middle aligned row">
+                <div class="center aligned four wide column">
+                    <div class="ui small image">
+                        <img class="bw-image" id="python-icon" src="{% static 'icons/python.png' %}">
+                    </div>
+                </div>
+                <div class="center aligned four wide column">
+                    <div class="ui small image">
+                        <img class="bw-image" id='django-icon' src="{% static 'icons/django.png' %}">
+                    </div>
+                </div>
+                <div class="center aligned four wide column">
+                    <div class="ui small image">
+                        <img class="bw-image" id='javascript-icon' src="{% static 'icons/javascript.png' %}">
+                    </div>
+                </div>
+                <div class="center aligned four wide column">
+                    <div class="ui small image">
+                        <img class="bw-image" id='c++-icon' src="{% static 'icons/c++.png' %}">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="ui container section-container" id="contact-form">
+        <div class="ui header">CONTACT ME</div>
+    </div>
+
+    <script>
+
+        const project_section = $('#projects-container')
+        const window_height = $(window).height()
+
+        $(window.document).scroll( function () {
+            const project_scroll_position = project_section.position().top
+            const window_fraction = 5
+            const min_position = project_scroll_position - ((window_fraction - 1) * window_height / window_fraction)
+            const max_position = project_scroll_position + (window_height / window_fraction)
+            let scroll_position = $(window).scrollTop()
+            if (scroll_position > min_position && scroll_position < max_position) {
+                $('body').addClass('black-background')
+                $('.nav_text').addClass('white-font')
+            } else {
+                $('body').removeClass('black-background')
+                $('.nav_text').removeClass('white-font')
+            }
+        })
+
+
+    </script>
+
     <style>
+        body {
+            transition: background-color 0.6s ease;
+        }
+
+        .white-font {
+            color: white !important;
+        }
+
+        .black-background {
+            background-color: var(--TT-black);
+        }
+
         #header-block {
             position: relative;
-            color: white;
             height: 105vh;
         }
 
@@ -95,9 +200,17 @@
             z-index: -12;
         }
 
-        #icon-container {
-            height: 60vh;
+        .section-container {
+            height: 95vh;
             z-index: -11;
+        }
+
+        #topic-container {
+            margin-top: 50vh;
+        }
+
+        .bw-image {
+            filter: grayscale(1);
         }
 
     </style>
