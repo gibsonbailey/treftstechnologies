@@ -4,7 +4,7 @@ from TT.settings.base import *
 DEBUG = True
 ALLOWED_HOSTS = ['*']
 
-BUILT_JS = True
+BUILT_JS = False
 TEMPLATES[0]['OPTIONS']['context_processors'].append('pages.context_processors.built_js')
 
 

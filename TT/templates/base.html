@@ -84,16 +84,16 @@
         <div class="navbar">
             <div class="button-group">
                 {% if not home_nav %}
-                    <a class="nav_item nav_text" href="{% url "pages:home" %}">Trefts Technologies.</a>
+                    <a class="nav_item invertible" href="{% url "pages:home" %}">Trefts Technologies.</a>
                 {% endif %}
             </div>
             <div class="button-group">
-                <a class="nav_item nav_text" href="{% url "articles:list" %}">Articles</a>
+                <a class="nav_item invertible" href="{% url "articles:list" %}">Articles</a>
                 {% if not user.is_authenticated %}
-                <a id="login_menu" class="nav_item nav_text" href="#">Login</a>
+                <a id="login_menu" class="nav_item invertible" href="#">Login</a>
                 {% else %}
                     <div class="ui nav_item simple dropdown">
-                        <a class="text user-dropdown-label nav_text" href="{% url "profiles:home" pk=user.pk %}">
+                        <a class="text user-dropdown-label invertible" href="{% url "profiles:home" pk=user.pk %}">
                             {% if user.first_name %}
                                 {{ user.first_name}}
                             {% else %}
@@ -101,7 +101,7 @@
                             {% endif %}
                         </a>
                         <div class="menu">
-                            <a class="item nav_text" href="{% url "account_logout" %}">Logout</a>
+                            <a class="item invertible" href="{% url "account_logout" %}">Logout</a>
                         </div>
                     </div>
                 {% endif %}

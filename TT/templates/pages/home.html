@@ -39,7 +39,7 @@
                 <div class="two wide column">
                 </div>
                 <div class="ten wide center aligned column">
-                    <h1 class="ui huge header">
+                    <h1 class="ui huge header invertible">
                         Software engineering services for the web and more.
                     </h1>
                 </div>
@@ -129,7 +129,7 @@
     </div>
 
     <div class="ui container section-container" id="contact-form">
-        <div class="ui header">CONTACT ME</div>
+        <div class="ui header invertible">CONTACT ME</div>
     </div>
 
     <script>
@@ -141,17 +141,16 @@
             const project_scroll_position = project_section.position().top
             const window_fraction = 5
             const min_position = project_scroll_position - ((window_fraction - 1) * window_height / window_fraction)
-            const max_position = project_scroll_position + (window_height / window_fraction)
+            const max_position = min_position + 2 * window_height
             let scroll_position = $(window).scrollTop()
             if (scroll_position > min_position && scroll_position < max_position) {
                 $('body').addClass('black-background')
-                $('.nav_text').addClass('white-font')
+                $('.invertible').addClass('white-font')
             } else {
                 $('body').removeClass('black-background')
-                $('.nav_text').removeClass('white-font')
+                $('.invertible').removeClass('white-font')
             }
         })
-
 
     </script>
 
