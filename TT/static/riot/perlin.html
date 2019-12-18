@@ -20,7 +20,11 @@
 
 
             const canvas = document.querySelector('#perlin-3d-canvas')
-            const renderer = new THREE.WebGLRenderer({canvas})
+            const renderer_config = {
+                canvas: canvas,
+                alpha: true,
+            }
+            const renderer = new THREE.WebGLRenderer(renderer_config)
             const scene = new THREE.Scene()
             const camera = new THREE.OrthographicCamera( camera_width / - 2, camera_width / 2, camera_height / 2, camera_height / - 2, -1000, 1000 );
             const ambient_light = new THREE.AmbientLight(white)//, intensity);
@@ -36,8 +40,8 @@
             if (!!self.opts.background_color) {
                 scene.background = new THREE.Color(self.opts.background_color)
             } else {
-                //scene.background = new THREE.Color(white)
-                scene.background = new THREE.Color(green_blue)
+                // transparent background
+                renderer.setClearColor(white, 0)
             }
 
             let max_pixel_ratio = 4

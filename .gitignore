@@ -121,6 +121,7 @@ django-dev/
 VIRT_ENV/
 manage.py
 #wsgi.py
+TT/static/riot/all.js
 
 # Node
 node_modules/
