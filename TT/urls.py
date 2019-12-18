@@ -1,3 +1,5 @@
+from django.contrib.staticfiles.templatetags.staticfiles import static
+from django.views.generic.base import RedirectView
 from django.contrib import admin
 from django.conf import settings
 from django.conf.urls.static import static
@@ -15,6 +17,9 @@ urlpatterns = [
 
     # Third Party
     path('djga/', include('google_analytics.urls')),
+
+    # Favicon redirect
+    path('favicon.ico', RedirectView.as_view(url='/static/icons/favicon.ico')),
 ]
 
 if settings.DEBUG:

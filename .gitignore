@@ -111,8 +111,7 @@ uwsgi-django/
 /TT/config
 
 # Editor
-.idea/*
-.idea
+.idea/
 .DS_Store
 
 logs/
