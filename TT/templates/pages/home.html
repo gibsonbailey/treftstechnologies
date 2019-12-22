@@ -33,12 +33,12 @@
         </div>
     </div>
 
-    <div class="ui container section-container" id="topic-container">
+    <div class="ui segment" id="topic-container">
         <div class="ui stackable three column grid">
             <div class="middle aligned row">
                 <div class="two wide column">
                 </div>
-                <div class="ten wide center aligned column">
+                <div class="ten wide center aligned column" id="color-block-container">
                     <h1 class="ui huge header invertible">
                         Software engineering services for the web and more.
                     </h1>
@@ -52,47 +52,49 @@
     <div class="ui container section-container" id="projects-container">
         <div class="ui centered container stackable three column grid">
             <div class="middle aligned row">
-                <div class="four wide column">
-                    <div class="ui inverted segment">
+                <div class="five wide column">
+                    <div class="ui invertible segment project-segment">
                         <div class="content">
                             <div class="header">
-                                Project 1
+                                Perlin Noise
                                 <div class="meta">
-                                    January 2, 2019
+                                    August 1, 2019
                                 </div>
                             </div>
                             <div class="description">
-                                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Adipisci aut dolor doloremque in odit officia quidem, quod sapiente sequi sit ut velit voluptates voluptatibus! Accusamus autem debitis deleniti dolorem vitae?
+                                I implemented an easy-to-use JavaScript class for producing smooth noise data using the algorithm invented by Ken Perlin. This project
+                                involved a small bit of linear algebra to produce a mind-boggling effect. I outline how the class was built in
+                                <a class="project-link" href="{% url "articles:detail" slug=perlin_noise_article.slug %}">this article</a>.
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="four wide column">
-                    <div class="ui inverted card">
+                <div class="five wide column">
+                    <div class="ui invertible segment project-segment">
                         <div class="content">
                             <div class="header">
-                                Project 1
+                                Wave Equation Integrator
                                 <div class="meta">
-                                    January 2, 2019
+                                    November 12, 2019
                                 </div>
                             </div>
                             <div class="description">
-                                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Adipisci aut dolor doloremque in odit officia quidem, quod sapiente sequi sit ut velit voluptates voluptatibus! Accusamus autem debitis deleniti dolorem vitae?
+                                As an introduction to WebGl, I built an <a class="project-link" href="/webgl">interactive wave simulator</a>. It continuously solves the wave equation via a second-order, two-dimensional central difference scheme.
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="four wide column">
-                    <div class="ui card">
+                <div class="five wide column">
+                    <div class="ui invertible segment project-segment">
                         <div class="content">
                             <div class="header">
-                                Project 1
+                                Ram-Air Parachute Descent Simulator
                                 <div class="meta">
-                                    January 2, 2019
+                                    December 20, 2019
                                 </div>
                             </div>
                             <div class="description">
-                                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Adipisci aut dolor doloremque in odit officia quidem, quod sapiente sequi sit ut velit voluptates voluptatibus! Accusamus autem debitis deleniti dolorem vitae?
+                                I designed the physical model for a realistic skydiving parachute descent in VR. I implemented the forces and physical properties, and used an external solver for integration.
                             </div>
                         </div>
                     </div>
@@ -128,8 +130,34 @@
         </div>
     </div>
 
-    <div class="ui container section-container" id="contact-form">
-        <div class="ui header invertible">CONTACT ME</div>
+    <div class="ui segment" id="contact-segment">
+        <div class="ui container section-container" id="contact-container">
+            <div class="ui three column grid">
+
+                <div class="seven wide column">
+                    <form class="ui form" id="contact-form">
+                        <div class="field">
+                            <input type="text" name="name" placeholder="name">
+                        </div>
+                        <div class="field">
+                            <input type="text" name="email" placeholder="email">
+                        </div>
+                        <div class="field">
+                            <textarea name="message" placeholder="Begin typing message..."></textarea>
+                        </div>
+                        <input class="ui basic black button" type="submit" id="contact-submit-button">
+                    </form>
+                </div>
+
+                <div class="one wide column"></div>
+
+                <div class="eight wide column">
+                    <h1 class="ui header">CONTACT ME</h1>
+                    <p>If you believe that I may be able to help you with your work, please send me a message.</p>
+                </div>
+
+            </div>
+        </div>
     </div>
 
     <script>
@@ -141,7 +169,7 @@
             const project_scroll_position = project_section.position().top
             const window_fraction = 5
             const min_position = project_scroll_position - ((window_fraction - 1) * window_height / window_fraction)
-            const max_position = min_position + 2 * window_height
+            const max_position = min_position + 3 * window_height
             let scroll_position = $(window).scrollTop()
             if (scroll_position > min_position && scroll_position < max_position) {
                 $('body').addClass('black-background')
@@ -157,6 +185,80 @@
     <style>
         body {
             transition: background-color 0.6s ease;
+        }
+
+        #color-block-container {
+            text-align: center;
+            width: 80vh;
+            height: 80vh;
+            background-image: url("{% static "article_images/shelf.png" %}");
+            background-repeat: no-repeat;
+            background-position: right top;
+            overflow: auto;
+        }
+
+        #projects-container {
+            margin: auto auto 35em auto;
+        }
+
+        #projects-container .five.wide.column {
+            align-self: auto !important;
+        }
+
+        .project-segment {
+            background: none !important;
+            border: none !important;
+            box-shadow: none !important;
+            font-size: 1.6em !important;
+            line-height: 2em !important;
+        }
+
+        .project-segment .header {
+            font-size: 1.7em !important;
+        }
+
+        .project-segment .meta {
+            font-size: 0.5em !important;
+            color: var(--TT-light-gray);
+            margin-bottom: 1.3em;
+        }
+
+        .project-segment .description {
+            font-size: 1.0em !important;
+        }
+
+        #contact-form > .field {
+            margin-bottom: 4em;
+        }
+
+        #contact-form > .field > input {
+            border: none;
+            border-radius: 0px;
+            border-bottom: 3px solid var(--TT-black);
+        }
+
+        #contact-form > .field > textarea {
+            border-radius: 0px;
+            border: 3px solid var(--TT-black);
+        }
+
+        #contact-submit-button {
+            border-radius: 0px;
+            border: 2px solid var(--TT-black);
+        }
+
+        #contact-segment {
+            border-radius: 0px;
+            border: none;
+            box-shadow: none;
+            margin: 0px;
+            font-size: 2em;
+            padding-top: 40rem;
+        }
+
+        #contact-segment .header {
+            font-size: 1.5em;
+            margin-bottom: 1.5em;
         }
 
         .white-font {
@@ -181,7 +283,7 @@
             top: 0;
             z-index: -10;
             width: 100%;
-            height: 110vh;
+            height: 130vh;
         }
 
         .main-header {
@@ -204,12 +306,48 @@
             z-index: -11;
         }
 
+        #contact-container {
+            height: 80vh;
+        }
+
         #topic-container {
             margin-top: 50vh;
+            background: none;
+            border: none;
+            box-shadow: none;
         }
 
         .bw-image {
             filter: grayscale(1);
+        }
+
+        .project-link {
+            color: var(--TT-light-blue);
+            text-decoration: none;
+            text-shadow:
+                    0px -2px 0 var(--TT-black),  0px -1px 0 var(--TT-black),  0px 0px 0 var(--TT-black),
+                    2px -2px 0 var(--TT-black),  2px -1px 0 var(--TT-black),  2px 0px 0 var(--TT-black),
+                    -2px -2px 0 var(--TT-black), -2px -1px 0 var(--TT-black), -2px 0px 0 var(--TT-black),
+                    1px -2px 0 var(--TT-black),  1px -1px 0 var(--TT-black),  1px 0px 0 var(--TT-black),
+                    -1px -2px 0 var(--TT-black), -1px -1px 0 var(--TT-black), -1px 0px 0 var(--TT-black),
+                    0px -2px 0 var(--TT-black),  0px -1px 0 var(--TT-black),  0px 0px 0 var(--TT-black);
+            box-shadow:
+                    0 -1px 0 0 var(--TT-black) inset,
+                    0 -2px 0 0 transparent inset ;
+
+            transition: all .3s ease-in;
+            font-size: 1.1em;
+        }
+
+        .project-link::selection {
+            color: var(--TT-black); background: var(--TT-light-blue);
+            text-shadow: none;
+        }
+
+        .project-link:hover {
+            transition: all .3s ease-out;
+            color: var(--TT-light-gray);
+            box-shadow:  0 -1px 0 0 var(--TT-black) inset, 0 -2px 0 0 var(--TT-light-gray) inset;
         }
 
     </style>

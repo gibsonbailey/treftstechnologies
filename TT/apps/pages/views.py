@@ -1,7 +1,9 @@
 from django.views.generic import TemplateView
-from django.contrib.messages import get_messages
+from django.conf import settings
 
 from profiles.forms import TTUserCreationForm
+from articles.models import Article
+
 
 class HomePageView(TemplateView):
     template_name = 'pages/home.html'
@@ -13,7 +15,9 @@ class HomePageView(TemplateView):
         data['home_nav'] = True
         data['page_title'] = 'Home'
         data['registration_form'] = registration_form
+        data['perlin_noise_article'] = Article.objects.filter(title__contains='Perlin').first()
         return data
+
 
 class WebGLCubeView(TemplateView):
     template_name = 'pages/waves.html'

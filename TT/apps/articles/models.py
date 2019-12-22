@@ -6,6 +6,7 @@ from django.db import models
 
 User = get_user_model()
 
+
 class Article(models.Model):
     title = models.CharField(max_length=100)
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='articles')
@@ -21,6 +22,7 @@ class Article(models.Model):
 
     def __str__(self):
         return self.title
+
 
 class Comment(models.Model):
     article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name='comments')
@@ -38,6 +40,7 @@ class Comment(models.Model):
 
     def __str__(self):
         return self.text.split(' ')[0]
+
 
 class CommentObjection(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='objections')
