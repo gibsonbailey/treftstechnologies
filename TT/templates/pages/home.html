@@ -10,6 +10,10 @@
     {% endif %}
 {% endblock extra_head %}
 
+{% block extra_js %}
+    <script src="https://unpkg.com/scrollreveal"></script>
+{% endblock extra_js %}
+
 {% block content %}
     <div id="header-block">
         <div class="ui text container grid middle aligned">
@@ -39,7 +43,7 @@
                 <div class="two wide column">
                 </div>
                 <div class="ten wide center aligned column" id="color-block-container">
-                    <h1 class="ui huge header invertible">
+                    <h1 class="ui huge header invertible" id="topic-statement">
                         Software engineering services for the web and more.
                     </h1>
                 </div>
@@ -151,7 +155,7 @@
 
                 <div class="one wide column"></div>
 
-                <div class="eight wide column">
+                <div class="eight wide column" id="contact-statement-column">
                     <h1 class="ui header">CONTACT ME</h1>
                     <p>If you believe that I may be able to help you with your work, please send me a message.</p>
                 </div>
@@ -164,6 +168,13 @@
 
         const project_section = $('#projects-container')
         const window_height = $(window).height()
+
+        $(window.document).ready( function () {
+            ScrollReveal({delay: 100, reset: true})
+            ScrollReveal().reveal('#topic-statement', {scale: 0.90})
+            ScrollReveal().reveal('#contact-form', {distance: '200px', origin: 'left'})
+            ScrollReveal().reveal('#contact-statement-column', {distance: '200px', origin: 'right'})
+        })
 
         $(window.document).scroll( function () {
             const project_scroll_position = project_section.position().top
@@ -254,6 +265,7 @@
             margin: 0px;
             font-size: 2em;
             padding-top: 40rem;
+            padding-bottom: 10rem;
         }
 
         #contact-segment .header {

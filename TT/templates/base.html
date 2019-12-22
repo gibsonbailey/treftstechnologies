@@ -124,8 +124,6 @@
         {% block before_footer %}
         {% endblock before_footer %}
 
-        <div class="footer-spacer"></div>
-
         <footer class="ui grid">
             <div class="ui container">
                 <p class="center">&copy {% now 'Y' %} Trefts Technologies LLC, All Rights Reserved</p>
@@ -488,16 +486,11 @@
             }
 
             footer {
-                position: absolute;
                 bottom: 0;
                 left: 0;
                 right: 0;
                 background: var(--TT-light-gray);
                 color: var(--TT-black);
-                height: 100px;
-            }
-
-            .footer-spacer {
                 height: 100px;
             }
 
