@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "build": "npx riot --ext html ./TT/static/riot ./TT/static/riot/all.js",
-    "build-watch": "npx riot -w --ext html ./TT/static/riot ./TT/static/riot/all.js"
+    "build-watch": "npx riot -w --ext html ./TT/static/riot ./TT/static/riot/all.js",
+    "preinstall": "npm install -g npx"
   },
   "repository": {
     "type": "git",
