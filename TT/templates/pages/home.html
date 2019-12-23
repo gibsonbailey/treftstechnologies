@@ -236,7 +236,11 @@
                             contact_dimmer.removeClass('active')
                             contact_form_message.addClass('contact-form-message-success')
                             contact_form_message.removeClass('contact-form-message-failure')
-                            contact_form_message.html('Thank you for linking up! Check your email for confirmation that I received your message.')
+                            contact_form_message.html("Thank you
+                            for linking up! Check your email for
+                            confirmation that I received your
+                            message. Be sure to check your junk or spam
+                            folder if you don't see it!.")
                         })
                         .fail( (err) => {
                             contact_dimmer.removeClass('active')
