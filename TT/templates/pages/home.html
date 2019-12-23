@@ -158,8 +158,12 @@
                 <div class="eight wide column" id="contact-statement-column">
                     <h1 class="ui header">CONTACT ME</h1>
                     <p>If you believe that I may be able to help you with your work, please send me a message.</p>
+                    <p id="contact-form-message"></p>
                 </div>
 
+            </div>
+            <div class="ui inverted dimmer" id="contact-dimmer">
+                <div class="ui loader"></div>
             </div>
         </div>
     </div>
@@ -174,6 +178,86 @@
             ScrollReveal().reveal('#topic-statement', {scale: 0.90})
             ScrollReveal().reveal('#contact-form', {distance: '200px', origin: 'left'})
             ScrollReveal().reveal('#contact-statement-column', {distance: '200px', origin: 'right'})
+
+
+            const contact_form = $('#contact-form')
+            const contact_form_message = $('#contact-form-message')
+            const contact_dimmer = $('#contact-dimmer')
+
+            contact_form
+                .form({
+                    fields: {
+                        message: {
+                            identifier: 'message',
+                            rules: [
+                                {
+                                    type   : 'empty',
+                                    prompt : 'Please enter a message.'
+                                }
+                            ]
+                        },
+                        email: {
+                            identifier: 'email',
+                            rules: [
+                                {
+                                    type   : 'email',
+                                    prompt : 'Please enter a valid email address.'
+                                }
+                            ]
+                        },
+                        name: {
+                            identifier: 'name',
+                            rules: [
+                                {
+                                    type   : 'empty',
+                                    prompt : 'Please enter your name.'
+                                }
+                            ]
+                        },
+                    },
+                })
+
+            contact_form.submit( (ev) => {
+                ev.preventDefault()
+                contact_form.form('validate form')
+                const data_array = contact_form.serializeArray()
+
+                let data = {}
+                for (field of data_array) {
+                    data[field.name] = field.value
+                }
+
+                const contact_form_url = '{% url "api:contact_form" %}'
+
+                if (contact_form.form('is valid')) {
+                    contact_dimmer.addClass('active')
+                    $.post(contact_form_url, data)
+                        .done((resp) => {
+                            contact_dimmer.removeClass('active')
+                            contact_form_message.addClass('contact-form-message-success')
+                            contact_form_message.removeClass('contact-form-message-failure')
+                            contact_form_message.html('Thank you for linking up! Check your email for confirmation that I received your message.')
+                        })
+                        .fail( (err) => {
+                            contact_dimmer.removeClass('active')
+                            contact_form_message.removeClass('contact-form-message-success')
+                            contact_form_message.addClass('contact-form-message-failure')
+                            let text = ''
+                            if (err.responseJSON === 'Invalid email.') {
+                                text = 'Please try a different email address. This one is not valid.'
+                            } else if (err.responseJSON === 'AuthenticationError') {
+                                text = 'My server is having problems at the moment. Please try emailing me directly at bailey@treftstechnologies.com.'
+                            } else if (err.responseJSON === 'No name.') {
+                                text = 'Please send your name with the message.'
+                            } else if (err.responseJSON === 'No message.') {
+                                text = "Please don't send an empty message."
+                            } else {
+                                text = 'My server is having problems at the moment.'
+                            }
+                            contact_form_message.html(text)
+                        })
+                }
+            })
         })
 
         $(window.document).scroll( function () {
@@ -196,6 +280,14 @@
     <style>
         body {
             transition: background-color 0.6s ease;
+        }
+
+        .contact-form-message-success {
+            color: #188f25;
+        }
+
+        .contact-form-message-failure {
+            color: #c90e0e;
         }
 
         #color-block-container {
