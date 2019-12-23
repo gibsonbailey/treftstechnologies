@@ -6,7 +6,8 @@
   "scripts": {
     "build": "npx riot --ext html ./TT/static/riot ./TT/static/riot/all.js",
     "build-watch": "npx riot -w --ext html ./TT/static/riot ./TT/static/riot/all.js",
-    "preinstall": "npm install -g npx"
+    "preinstall": "npm install -g npx",
+    "serve-production": "uwsgi --ini TT_uwsgi.ini"
   },
   "repository": {
     "type": "git",
