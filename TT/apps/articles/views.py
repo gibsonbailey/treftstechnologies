@@ -4,16 +4,16 @@ from django.http import Http404
 
 from .models import Article
 
+
 class ArticleListView(ListView):
     model = Article
     template_name = 'articles/list.html'
-    ordering = '-publish_date'
 
     def get_queryset(self):
         if self.request.user.is_superuser:
-            return Article.objects.all()
+            return Article.objects.all().order_by('-publish_date')
         else:
-            return Article.objects.filter(published=True)
+            return Article.objects.filter(published=True).order_by('-publish_date')
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
@@ -28,7 +28,7 @@ class ArticleDetailView(DetailView):
     def get_object(self):
         object = super().get_object()
         self.object = object
-        if object.published == False and not self.request.user.is_superuser:
+        if object.published is False and not self.request.user.is_superuser:
             raise Http404()
         return object
 
