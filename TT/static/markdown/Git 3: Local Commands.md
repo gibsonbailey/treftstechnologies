@@ -1,4 +1,4 @@
-When working on substantial projects, especially with others, Git becomes an indispensable tool.
+When working on substantial projects, especially with others, Git realizes its potential as an indispensable tool.
 It takes some practice and research to grow into a proficient user. These are some of the most common
 commands that I use everyday when working on different features in a project.
 

@@ -34,7 +34,7 @@ This is a simplified set of actions, but they are the most common and important 
 
 In order to get started with Git, one must first install it. Use the command fit for your machine to install it.
 
-### Linux Ubuntu
+### Ubuntu Linux 
 
 ```
 sudo apt install git
